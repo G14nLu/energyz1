@@ -172,7 +172,7 @@ void isr_ieee154e_newSlot() {
       if (idmanager_getIsDAGroot()==TRUE) {
        	 //START OF TELEMATICS CODE
 		 //If I'm the DAG Root, here I can store the Key
-		 scheduler_push_task(coordinatorORParent_init,TASKPRIO_SIXTOP);
+		 coordinatorORParent_init();
 		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
@@ -358,14 +358,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_asn() {
-//   asn_t output;
-//   output.byte4         =  ieee154e_vars.asn.byte4;
-//   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
-//   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
-//   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
-//   return TRUE;
-//}
+bool debugPrint_asn() {
+   asn_t output;
+   output.byte4         =  ieee154e_vars.asn.byte4;
+   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
+   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
+   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
+   return TRUE;
+}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -390,11 +390,11 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_macStats() {
-//   // send current stats over serial
-//   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
-//   return TRUE;
-//}
+bool debugPrint_macStats() {
+   // send current stats over serial
+   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+   return TRUE;
+}
 
 //=========================== private =========================================
 
@@ -858,12 +858,13 @@ port_INLINE void activity_ti1ORri1() {
          break;
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
+
          // stop using serial
          openserial_stop();
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, cellType);
          } else {
             ieee154e_vars.dataToSend = NULL;
          }
@@ -873,15 +874,35 @@ port_INLINE void activity_ti1ORri1() {
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
 
-            //START OF TELEMATICS CODE
-            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-         	 security_outgoingFrame(ieee154e_vars.dataToSend);
-         	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
-            }
-
-            //END OF TELEMATICS CODE
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
+
+            //START OF TELEMATICS CODE
+            /*
+             * if security is enabled on the current frame,
+             * I have to encrypt it before sending.
+             * Note that if this is not the first attempt, the
+             * clearText has to be encrypted again.
+*/
+            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+            	//if it is a retransmission, recover the clearText packet
+            	if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
+					 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
+//					 uint8_t i;
+//					 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
+//						ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
+//					 }
+					 memcpy(&ieee154e_vars.dataToSend->l2_payload[0],
+							&ieee154e_vars.dataToSend->clearText[0],
+							ieee154e_vars.dataToSend->length);
+				 }
+
+            	security_outgoingFrame(ieee154e_vars.dataToSend);
+            	packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+            }
+            //END OF TELEMATICS CODE
+
+
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
          } else if (cellType==CELLTYPE_TX){
@@ -892,7 +913,8 @@ port_INLINE void activity_ti1ORri1() {
              (cellType==CELLTYPE_TXRX && ieee154e_vars.dataToSend!=NULL)) {
             break;
          }
-      case CELLTYPE_RX:
+
+    	  case CELLTYPE_RX:
          // stop using serial
          openserial_stop();
          // change state
@@ -1457,10 +1479,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       ieee154e_vars.lastCapturedTime = capturedTime;
       
 	  //START OF TELEMATICS CODE
-	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.dataReceived);
-	  }
-	//END OF TELEMATICS CODE
+//	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
+//		  security_incomingFrame(ieee154e_vars.dataReceived);
+//	  }
+	  //END OF TELEMATICS CODE
 
       // if I just received an invalid frame, stop
       if (isValidRxFrame(&ieee802514_header)==FALSE) {
@@ -1546,8 +1568,8 @@ port_INLINE void activity_ri6() {
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
    //START OF TELEMATICS CODE
-   ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 7;
+   ieee154e_vars.ackToSend->l2_security = FALSE;
+   ieee154e_vars.ackToSend->l2_securityLevel = 3;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
 	   open_addr_t* temp_addr;

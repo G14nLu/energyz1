@@ -60,7 +60,6 @@
 //*****************************************************************************
 volatile uint8_t g_ui8CurrentAESOp = AES_NONE;
 
-
 //*****************************************************************************
 //
 //! AESLoadKey writes the key into the Key Ram. Key Ram location must be
@@ -70,7 +69,7 @@ volatile uint8_t g_ui8CurrentAESOp = AES_NONE;
 //! \param   ui8KeyLocation is location in Key RAM.
 //!
 //! The \e ui8KeyLocation parameter is an enumerated type which specifies
-//! the Key Ram locationin which the key is stored.
+//! the Key Ram location in which the key is stored.
 //! This parameter can have any of the following values:
 //!
 //! - \b KEY_AREA_0
@@ -87,8 +86,7 @@ volatile uint8_t g_ui8CurrentAESOp = AES_NONE;
 //! \return  AES_SUCCESS if successful.
 //
 //*****************************************************************************
-uint8_t AESLoadKey(uint8_t *pui8Key , uint8_t ui8KeyLocation)
-{
+uint8_t AESLoadKey(uint8_t *pui8Key , uint8_t ui8KeyLocation){
     static uint32_t ui32temp[4];
     uint8_t * pui8temp = (uint8_t *)ui32temp;
     uint8_t i;
@@ -350,3 +348,103 @@ uint8_t AESECBGetResult(void)
 //
 //*****************************************************************************
 
+//START OF TELEMATICS CODE
+//*****************************************************************************
+//
+// Interrupt handler for AES
+//
+// param   None
+//
+// return  None
+//
+//*****************************************************************************
+void AESIntHandler(void)
+{
+    switch (g_ui8CurrentAESOp)
+    {
+    case AES_ECB:
+        ui8AESECBIntHandler = 1;
+        //
+        // clear interrupts
+        //
+        HWREG(AES_CTRL_INT_CLR) = 0x00000003;
+        break;
+
+    case AES_NONE:
+        break;
+
+    case AES_CCM:
+        break;
+
+    case AES_SHA256:
+        break;
+
+    case AES_KEYL0AD:
+        break;
+    }
+}
+
+//uint8_t AESECBEncrypt(uint8_t *pui8Key,
+//                      uint8_t ui8KeyLocation,
+//                      uint8_t *pui8Buf,
+//                      uint8_t ui8IntEnable){
+//
+//	//Set the clocking to run directly from the external crystal/oscillator.
+//	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+//
+//	// Enable AES peripheral
+//	SysCtrlPeripheralReset(SYS_CTRL_PERIPH_AES);
+//	SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_AES);
+//
+//	// Register interrupt handler
+//	IntRegister(INT_AES, AESIntHandler);
+//
+//	// Enable global interrupts
+//	IntAltMapEnable();
+//	IntMasterEnable();
+//
+//	uint8_t finalValue;
+//
+//	if(ui8IntEnable){ //using interrupt service routine
+//
+//		//load the key
+//		AESLoadKey((uint8_t*)pui8Key,
+//				    ui8KeyLocation);
+//
+//		//start ECB - AES
+//		AESECBStart(pui8Buf,
+//				    pui8Buf,
+//				    ui8KeyLocation,
+//				    true,
+//				    true);
+//
+//	    //wait for the completion of operation
+//		do
+//	        {
+//	            ASM_NOP;
+//	        }while(ui8AESECBIntHandler == 0);
+//
+//        ui8AESECBIntHandler = 0;
+//
+//        //get the result of the ECB operation
+//        finalValue = AESECBGetResult();
+//
+//	    }
+//	else{
+//
+//		//using polling
+//		AESLoadKey((uint8_t*)pui8Key, ui8KeyLocation);
+//		AESECBStart(pui8Buf, pui8Buf, ui8KeyLocation, true, false);
+//
+//		// wait for completion of the operation
+//		do{
+//			ASM_NOP;
+//		}while(!(AESECBCheckResult()));
+//
+//		finalValue = AESECBGetResult();
+//
+//	    }
+//
+//	return finalValue;
+//}
+//END OF TELEMATICS CODE

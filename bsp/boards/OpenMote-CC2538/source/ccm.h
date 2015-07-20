@@ -84,6 +84,32 @@ extern uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
                                           uint8_t *pui8C, 
                                           uint16_t ui16LenC, 
                                           uint8_t *pui8Cstate);
+
+uint8_t CCMEncrypt(bool bEncrypt,
+				   uint8_t* pui8Key,
+				   uint8_t ui8Mval,
+				   uint8_t *pui8N,
+				   uint8_t *pui8M,
+				   uint16_t ui16LenM,
+				   uint8_t *pui8A,
+				   uint16_t ui16LenA,
+				   uint8_t ui8KeyLocation,
+				   uint8_t *pui8Cstate,
+				   uint8_t ui8CCMLVal,
+				   uint8_t ui8CCMIntEnable);
+
+uint8_t CCMDecrypt(bool bDecrypt,
+				   uint8_t* pui8Key,
+				   uint8_t ui8Mval,
+				   uint8_t *pui8N,
+				   uint8_t *pui8C,
+				   uint16_t ui16LenC,
+				   uint8_t *pui8A,
+				   uint16_t ui16LenA,
+				   uint8_t ui8KeyLocation,
+				   uint8_t *pui8Cstate,
+				   uint8_t ui8CCMLVal,
+				   uint8_t ui8CCMIntEnable);
     
 //*****************************************************************************
 //
@@ -95,3 +121,5 @@ extern uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
 #endif
 
 #endif  // __CCM_H__
+
+

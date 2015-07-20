@@ -52,6 +52,7 @@
 #include "pka.h"
 #include "sys_ctrl.h"
 #include "debug.h"
+#include "openserial.h"
 
 //*****************************************************************************
 //
@@ -89,6 +90,15 @@
 //
 //****************************************************************************
 #define PKA_RAM_SIZE            2000
+
+
+//my
+//*****************************************************************************
+//
+// Current PKA operation initialized to None
+//
+//*****************************************************************************
+volatile uint8_t g_ui8CurrentPKAOp = 0;
 
 
 //*****************************************************************************
@@ -411,6 +421,10 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
         return (PKA_STATUS_BUF_UNDERFLOW);
     }
 
+	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+							 (errorparameter_t)len,
+							 (errorparameter_t)991);
+
     //
     // copy the result from vector C into the pResult.
     //
@@ -420,7 +434,7 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
     }
 
     return (PKA_STATUS_SUCCESS);
-} // PKABigNumModGetResult()
+}
 
 //*****************************************************************************
 //
@@ -1138,6 +1152,10 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     // Make sure that the supplied result buffer is adequate to store the
     // resultant data.
     //
+
+    openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+						 (errorparameter_t)len,
+						 (errorparameter_t)991);
     if(*pui32Len < len)
     {
         return (PKA_STATUS_BUF_UNDERFLOW);
@@ -1985,3 +2003,160 @@ PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
 //
 //*****************************************************************************
 
+void PKAIntHandler(void)
+{
+//    switch (g_ui8CurrentPKAOp)
+//    {
+//    case AES_ECB:
+////        ui8AESECBIntHandler = 1;
+////        //
+////        // clear interrupts
+////        //
+////        HWREG(AES_CTRL_INT_CLR) = 0x00000003;
+//        break;
+//
+//    case AES_NONE:
+//        break;
+//
+//    case AES_CCM:
+//        break;
+//
+//    case AES_SHA256:
+//        break;
+//
+//    case AES_KEYL0AD:
+//        break;
+//    }
+}
+
+uint8_t PKABigNumMod(uint32_t* pui32BNum,
+		             uint8_t   ui8BNSize,
+                     uint32_t* pui32Modulus,
+                     uint8_t   ui8ModSize,
+                     uint32_t* pui32ResultLocation, //PKA RAM location where the result will be available
+                     uint8_t   ui8Size,
+                     uint32_t*  ui32ResVector){
+
+	//Set the clocking to run directly from the external crystal/oscillator.
+	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+
+	// Enable PKA peripheral
+	SysCtrlPeripheralReset(SYS_CTRL_PERIPH_PKA);
+	SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_PKA);
+
+	// Register interrupt handler
+	IntRegister(INT_PKA, PKAIntHandler);
+
+	// Enable global interrupts
+	IntAltMapEnable();
+	IntMasterEnable();
+
+	uint8_t finalValue;
+
+	finalValue = PKABigNumModStart(pui32BNum,
+			                       ui8BNSize,
+			                       pui32Modulus,
+			                       ui8ModSize,
+			                       pui32ResultLocation);
+
+	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+							 (errorparameter_t)finalValue,
+							 (errorparameter_t)99);
+
+    //wait for the completion of operation
+	do{
+            ASM_NOP;
+	}while((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN)!= 0);
+
+    //get the result of the PKA operation
+    finalValue = PKABigNumModGetResult(ui32ResVector,
+    		                           ui8Size,
+                                       *(pui32ResultLocation));
+
+
+	return finalValue;
+}
+
+
+//testata, funziona correttamente
+uint8_t PKABigNumCmp(uint32_t* pui32BNum1,
+		             uint32_t* pui32BNum2,
+		             uint8_t   ui8BNSize){
+
+	//Set the clocking to run directly from the external crystal/oscillator.
+	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+
+	// Enable PKA peripheral
+	SysCtrlPeripheralReset(SYS_CTRL_PERIPH_PKA);
+	SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_PKA);
+
+	// Register interrupt handler
+	IntRegister(INT_PKA, PKAIntHandler);
+
+	// Enable global interrupts
+	IntAltMapEnable();
+	IntMasterEnable();
+
+	uint8_t finalValue;
+
+	finalValue = PKABigNumCmpStart(pui32BNum1,
+			                       pui32BNum2,
+			                       ui8BNSize);
+
+    //wait for the completion of operation
+	do{
+            ASM_NOP;
+	}while((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN)!= 0);
+
+    //get the result of the PKA operation
+    finalValue = PKABigNumCmpGetResult();
+
+	return finalValue;
+}
+
+uint8_t PKABigNumAdd(uint32_t* pui32BNum1,
+		             uint32_t* pui32BNum2,
+		             uint8_t   ui8BNSize,
+		             uint32_t* result){
+
+	//Set the clocking to run directly from the external crystal/oscillator.
+	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+
+	// Enable PKA peripheral
+	SysCtrlPeripheralReset(SYS_CTRL_PERIPH_PKA);
+	SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_PKA);
+
+	// Register interrupt handler
+	IntRegister(INT_PKA, PKAIntHandler);
+
+	// Enable global interrupts
+	IntAltMapEnable();
+	IntMasterEnable();
+
+	uint8_t finalValue;
+	uint32_t* pui32ResultLocation;
+
+	finalValue = PKABigNumAddStart(pui32BNum1,
+			                       ui8BNSize,
+			                       pui32BNum2,
+			                       ui8BNSize,
+			                       pui32ResultLocation);
+
+   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+						 (errorparameter_t)finalValue,
+						 (errorparameter_t)99);
+
+    //wait for the completion of operation
+	do{
+            ASM_NOP;
+	}while((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN)!= 0);
+
+	uint32_t len;
+
+    //get the result of the PKA operation
+    finalValue = PKABigNumAddGetResult(result,
+    		                           &len,
+    		                           *(pui32ResultLocation));
+
+	return finalValue;
+}

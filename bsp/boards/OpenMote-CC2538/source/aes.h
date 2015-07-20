@@ -44,6 +44,9 @@
 #include <headers/hw_ints.h>
 #include <headers/hw_types.h>
 #include "interrupt.h"
+//START OF TELEMATICS CODE
+#include "sys_ctrl.h"
+//END OF TELEMATICS CODE
 
 //*****************************************************************************
 //
@@ -147,6 +150,13 @@ extern volatile uint8_t g_ui8CurrentAESOp;
 
 //*****************************************************************************
 //
+// Variables to synchronize with interrupt handler
+//
+//*****************************************************************************
+uint8_t ui8AESECBIntHandler;
+
+//*****************************************************************************
+//
 // Prototypes for the APIs.
 //
 //*****************************************************************************
@@ -159,6 +169,13 @@ extern uint8_t AESECBStart(uint8_t *pui8MsgIn,
                            uint8_t ui8IntEnable);
 extern uint8_t AESECBCheckResult(void);
 extern uint8_t AESECBGetResult(void);
+//START OF TELEMATICS CODE
+uint8_t AESECBEncrypt(uint8_t *pui8Key,
+                      uint8_t ui8KeyLocation,
+                      uint8_t *pui8Buf,
+                      uint8_t ui8IntEnable);
+void AESIntHandler(void);
+//END OF TELEMATICS CODE
 
 //*****************************************************************************
 //

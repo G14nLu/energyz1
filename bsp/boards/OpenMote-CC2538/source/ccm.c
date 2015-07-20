@@ -47,6 +47,12 @@
 #include "aes.h"
 #include "ccm.h"
 
+// Variable to syncronize with interrupt handler
+static uint8_t volatile ui8CCMIntHandler = 0;
+
+//Prototypes for private methods
+void CCMIntHandler(void);
+
 
 //*****************************************************************************
 //
@@ -630,7 +636,7 @@ uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
     g_ui8CurrentAESOp = AES_NONE;
     return (AES_SUCCESS);
 }
-
+//START OF TELEMATICS CODE
 //*****************************************************************************
 //
 //! Close the Doxygen group.
@@ -638,3 +644,260 @@ uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
 //
 //*****************************************************************************
 
+/*
+ * AES-CCM encrypt example
+ *
+ * param   bEncrypt           if set to true run encryption
+ * param   pui8Key            pointer to Key
+ * param   ui8Mval            length of authentication
+ * param   pui8N              Nonce
+ * param   pui8M              input message
+ * param   ui16LenM           length of message
+ * param   pui8A              Additional data
+ * param   ui16LenA           length of additional data
+ * param   ui8KeyLocation     location in Key RAM
+ * param   ui8CCMLVal         Lval for ccm
+ * param   ui8CCMIntEnable    set to true to enable interrupts and false to disable
+ * param   pui8Cstate         authentication tag
+ * param   ui8CCMIntEnable    set true/false to enable/disable interrupts
+ */
+
+uint8_t CCMEncrypt(bool bEncrypt,
+				   uint8_t* pui8Key,
+				   uint8_t ui8Mval,
+				   uint8_t *pui8N,
+				   uint8_t *pui8M,
+				   uint16_t ui16LenM,
+				   uint8_t *pui8A,
+				   uint16_t ui16LenA,
+				   uint8_t ui8KeyLocation,
+				   uint8_t *pui8Cstate,
+				   uint8_t ui8CCMLVal,
+				   uint8_t ui8CCMIntEnable){
+
+	uint8_t finalValue; //stores the final value from the CCM hardware operation
+
+	// Set the clocking to run directly from the external crystal/oscillator
+	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+
+    // Enable AES peripheral
+    SysCtrlPeripheralReset(SYS_CTRL_PERIPH_AES);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_AES);
+
+    // Register AES interrupt
+    IntRegister(INT_AES, CCMIntHandler);
+
+    // Enable global interrupts
+    IntAltMapEnable();
+    IntMasterEnable();
+
+    if(ui8CCMIntEnable){
+    	// example using interrupt service routine
+
+    	// Register AES interrupt
+//		IntRegister(INT_AES, CCMIntHandler);
+
+		//Load the key
+		if((finalValue = AESLoadKey((uint8_t*)pui8Key, ui8KeyLocation)) !=
+		           AES_SUCCESS){
+				return finalValue;
+		}
+
+		//Start the CCM process
+		if((finalValue = CCMAuthEncryptStart(bEncrypt, ui8Mval, pui8N, pui8M,
+											 ui16LenM, pui8A, ui16LenA,
+											 ui8KeyLocation, pui8Cstate,
+											 ui8CCMLVal, ui8CCMIntEnable)) !=
+				AES_SUCCESS){
+					return finalValue;
+
+		}
+
+	    // wait for completion of the operation
+		do{
+			ASM_NOP;
+		}while(ui8CCMIntHandler == 0 );
+
+		//Get the result of the CCM Process
+		finalValue = CCMAuthEncryptGetResult(ui8Mval,
+				                             ui16LenM,
+				                             pui8Cstate);//,
+				                             //bEncrypt);
+
+
+    } else {// example using polling
+
+		// Unregister AES interrupt
+		IntUnregister(INT_AES);
+
+		//Load the key
+		if((finalValue = AESLoadKey((uint8_t*)pui8Key, ui8KeyLocation))
+		   != AES_SUCCESS){
+			return finalValue;
+		}
+
+		//Start CCM process
+		if((finalValue = CCMAuthEncryptStart(bEncrypt, ui8Mval, pui8N, pui8M,
+										  	  ui16LenM, pui8A, ui16LenA,
+										  	  ui8KeyLocation, pui8Cstate,
+										  	  ui8CCMLVal, ui8CCMIntEnable))
+		   != AES_SUCCESS){
+			//return finalValue;
+		}
+
+		// wait for completion of the operation
+		do{
+			ASM_NOP;
+		}while( !(CCMAuthEncryptCheckResult()));
+
+		//Get the result of CCM operations
+		if((finalValue = CCMAuthEncryptGetResult(ui8Mval,
+				                                 ui16LenM,
+				                                 pui8Cstate)) !=//,
+				                                 //bEncrypt)) !=
+		   AES_SUCCESS){
+			//return finalValue;
+		}
+    }
+    return finalValue;
+}
+
+void CCMIntHandler(void)
+{
+    switch (g_ui8CurrentAESOp)
+    {
+    case AES_ECB:
+        ui8AESECBIntHandler = 1;
+        // clear interrupts
+        HWREG(AES_CTRL_INT_CLR) = 0x00000003;
+        break;
+
+    case AES_NONE:
+        break;
+
+    case AES_CCM:
+        ui8CCMIntHandler = 1;
+        // clear interrupts
+        HWREG(AES_CTRL_INT_CLR) = 0x00000003;
+        break;
+
+    case AES_SHA256:
+        break;
+
+    case AES_KEYL0AD:
+        break;
+    }
+}
+
+///*
+// * brief   AES-CCM decrypt example
+// *
+// * param   bDecrypt           if set to true run decryption
+// * param   pui8Key            pointer to Key
+// * param   ui8Mval            length of authentication
+// * param   pui8N              Nonce
+// * param   C                  input encrypted message
+// * param   ui16LenC           length of message
+// * param   pui8A              Additional data
+// * param   ui16LenA           length of additional data
+// * param   ui8KeyLocation     location in Key RAM
+// * param   ui8CCMLVal         Lval for ccm
+// * param   ui8CCMIntEnable    set to true to enable interrupts and false to disable
+// * param   pui8ExpectedOutput pointer to expected output
+// * param   pui8Cstate         authentication Tag
+// * param   ui8CCMIntEnable    set true/false to enable/disable interrupts
+// * param   pui8ExpectedOutput pointer to Expected Output
+// *
+// * return 0 if successful
+// */
+//
+//
+uint8_t CCMDecrypt(bool bDecrypt,
+				   uint8_t* pui8Key,
+				   uint8_t ui8Mval,
+				   uint8_t *pui8N,
+				   uint8_t *pui8C,
+				   uint16_t ui16LenC,
+				   uint8_t *pui8A,
+				   uint16_t ui16LenA,
+				   uint8_t ui8KeyLocation,
+				   uint8_t *pui8Cstate,
+				   uint8_t ui8CCMLVal,
+				   uint8_t ui8CCMIntEnable){
+
+	uint8_t finalValue; //stores the final value from the CCM hardware operation
+
+	// Set the clocking to run directly from the external crystal/oscillator
+	SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+
+    // Enable AES peripheral
+    SysCtrlPeripheralReset(SYS_CTRL_PERIPH_AES);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_AES);
+
+    // Register AES interrupt
+    IntRegister(INT_AES, CCMIntHandler);
+
+    // Enable global interrupts
+    IntAltMapEnable();
+    IntMasterEnable();
+
+	if(ui8CCMIntEnable){// example using interrupt service routine
+
+		//Load the key
+		finalValue = AESLoadKey((uint8_t*)pui8Key, ui8KeyLocation);
+		if(finalValue != AES_SUCCESS) return finalValue;
+
+		//Start CCM inverse process
+		finalValue = CCMInvAuthDecryptStart(bDecrypt, ui8Mval, pui8N, pui8C,
+										   	ui16LenC, pui8A, ui16LenA,
+										   	ui8KeyLocation, pui8Cstate,
+										   	ui8CCMLVal, ui8CCMIntEnable);
+		if(finalValue != AES_SUCCESS) return finalValue;
+
+        // wait for completion of the operation
+		do{
+			ASM_NOP;
+		}while(ui8CCMIntHandler == 0);
+
+        finalValue = CCMInvAuthDecryptGetResult(ui8Mval,
+        		 	 	 	 	 	 	 	 	pui8C,
+        		 	 	 	 	 	 	 	 	ui16LenC,
+        		 	 	 	 	 	 	 	 	pui8Cstate);//,
+        		 	 	 	 	 	 	 	 	//bDecrypt);
+
+        if(finalValue != AES_SUCCESS) return finalValue;
+
+	} else {// example using polling
+
+		//Load the key
+        if((finalValue = AESLoadKey((uint8_t*)pui8Key,
+                                ui8KeyLocation)) != AES_SUCCESS){
+            return finalValue;
+        }
+
+        //Start CCM inverse operations
+        if((finalValue = CCMInvAuthDecryptStart(bDecrypt, ui8Mval, pui8N, pui8C,
+                                            ui16LenC, pui8A, ui16LenA,
+                                            ui8KeyLocation, pui8Cstate,
+                                            ui8CCMLVal,
+                                            ui8CCMIntEnable))!= AES_SUCCESS ){
+            return finalValue;
+        }
+
+        // wait for completion of the operation
+        do{
+            ASM_NOP;
+        }while(!(CCMInvAuthDecryptCheckResult()));
+
+        if((finalValue = CCMInvAuthDecryptGetResult(ui8Mval, pui8C, ui16LenC,
+                                                pui8Cstate//,
+//                                                bDecrypt
+                                                )) != AES_SUCCESS){
+            return finalValue;
+        }
+	}
+
+	return finalValue;
+
+}
+//END OF TELEMATICS CODE

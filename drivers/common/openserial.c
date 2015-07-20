@@ -290,45 +290,45 @@ void openserial_startOutput() {
             break;
          }
       case STATUS_OUTBUFFERINDEXES:
-//         if (debugPrint_outBufferIndexes()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_outBufferIndexes()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_ASN:
-//         if (debugPrint_asn()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_asn()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_MACSTATS:
-//         if (debugPrint_macStats()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_macStats()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_SCHEDULE:
-//         if(debugPrint_schedule()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_schedule()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_BACKOFF:
-//         if(debugPrint_backoff()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_backoff()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_QUEUE:
-//         if(debugPrint_queue()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_queue()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_NEIGHBORS:
-//         if (debugPrint_neighbors()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_neighbors()==TRUE) {
+            break;
+         }
+//         break;
       case STATUS_KAPERIOD:
-//         if (debugPrint_kaPeriod()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_kaPeriod()==TRUE) {
+            break;
+         }
+//         break;
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
@@ -423,16 +423,16 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_outBufferIndexes() {
-//   uint16_t temp_buffer[2];
-//   INTERRUPT_DECLARATION();
-//   DISABLE_INTERRUPTS();
-//   temp_buffer[0] = openserial_vars.outputBufIdxW;
-//   temp_buffer[1] = openserial_vars.outputBufIdxR;
-//   ENABLE_INTERRUPTS();
-//   openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
-//   return TRUE;
-//}
+bool debugPrint_outBufferIndexes() {
+   uint16_t temp_buffer[2];
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   temp_buffer[0] = openserial_vars.outputBufIdxW;
+   temp_buffer[1] = openserial_vars.outputBufIdxR;
+   ENABLE_INTERRUPTS();
+   openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
+   return TRUE;
+}
 
 //=========================== private =========================================
 

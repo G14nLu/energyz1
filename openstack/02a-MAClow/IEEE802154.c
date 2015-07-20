@@ -4,7 +4,9 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
+//START OF TELEMATICS CODE
 #include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -34,9 +36,11 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
+   //START OF TELEMATICS CODE
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
 	   prepend_AuxiliarySecurityHeader(msg);
    }
+   //END OF TELEMATICS CODE
 
    //General IEs here (those that are carried in all packets) -- None by now.
    

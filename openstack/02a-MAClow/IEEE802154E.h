@@ -130,16 +130,16 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131+1700,                  //  4000us
+   TsTxOffset                =  131,//-45,                //  4000us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151+1450+425,                  //  4606us
+   TsTxAckDelay              =  151,//-108-15,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration+4000,//+1050+800,  // 15000us
+   TsSlotDuration            =  PORT_TsSlotDuration,//-180,// 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
    maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-   maxTxAckPrepare           =  PORT_maxTxAckPrepare+425,
+   maxTxAckPrepare           =  PORT_maxTxAckPrepare,//-15,
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening

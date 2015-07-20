@@ -7,6 +7,7 @@
 // applications
 #include "opencoap.h"
 #include "uecho.h"
+#include "udplatency.h"
 
 //=========================== variables =======================================
 
@@ -39,6 +40,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case WKP_UDP_ECHO:
          uecho_sendDone(msg,error);
          break;
+      case WKP_UDP_LATENCY:
+    	  udplatency_sendDone(msg,error);
+    	  break;
       default:
 //         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
 //                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -98,6 +102,9 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_ECHO:
          uecho_receive(msg);
          break;
+      case WKP_UDP_LATENCY:
+    	  udplatency_receive(msg);
+    	  break;
       default:
 //         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
 //                               (errorparameter_t)msg->l4_destination_port,

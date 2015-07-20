@@ -275,6 +275,7 @@ SysCtrlClockGet(void)
     uint32_t ui32Clk;
     uint32_t ui32STA;
     uint32_t ui32SysDiv;
+    uint8_t k = 0;
 
     ui32STA = HWREG(SYS_CTRL_CLOCK_STA);
     ui32SysDiv =
@@ -285,34 +286,43 @@ SysCtrlClockGet(void)
     {
     case SYS_CTRL_SYSDIV_32MHZ:
         ui32Clk = SYS_CTRL_32MHZ;
+        k=1;
         break;
     case SYS_CTRL_SYSDIV_16MHZ:
         ui32Clk = SYS_CTRL_16MHZ;
+        k=2;
         break;
     case SYS_CTRL_SYSDIV_8MHZ:
         ui32Clk = SYS_CTRL_8MHZ;
+        k=3;
         break;
     case SYS_CTRL_SYSDIV_4MHZ:
         ui32Clk = SYS_CTRL_4MHZ;
+        k=4;
         break;
     case SYS_CTRL_SYSDIV_2MHZ:
         ui32Clk = SYS_CTRL_2MHZ;
+        k=5;
         break;
     case SYS_CTRL_SYSDIV_1MHZ:
         ui32Clk = SYS_CTRL_1MHZ;
+        k=6;
         break;
     case SYS_CTRL_SYSDIV_500KHZ:
         ui32Clk = SYS_CTRL_500KHZ;
+        k=7;
         break;
     case SYS_CTRL_SYSDIV_250KHZ:
         ui32Clk = SYS_CTRL_250KHZ;
+        k=8;
         break;
     }
 
     //
     // Return the computed clock rate.
     //
-    return(ui32Clk);
+//    return(ui32Clk);
+    return k;
 } // SysCtrlClockGet
 
 //*****************************************************************************

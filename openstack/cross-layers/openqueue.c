@@ -34,16 +34,16 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_queue() {
-//   debugOpenQueueEntry_t output[QUEUELENGTH];
-//   uint8_t i;
-//   for (i=0;i<QUEUELENGTH;i++) {
-//      output[i].creator = openqueue_vars.queue[i].creator;
-//      output[i].owner   = openqueue_vars.queue[i].owner;
-//   }
-//   openserial_printStatus(STATUS_QUEUE,(uint8_t*)&output,QUEUELENGTH*sizeof(debugOpenQueueEntry_t));
-//   return TRUE;
-//}
+bool debugPrint_queue() {
+   debugOpenQueueEntry_t output[QUEUELENGTH];
+   uint8_t i;
+   for (i=0;i<QUEUELENGTH;i++) {
+      output[i].creator = openqueue_vars.queue[i].creator;
+      output[i].owner   = openqueue_vars.queue[i].owner;
+   }
+   openserial_printStatus(STATUS_QUEUE,(uint8_t*)&output,QUEUELENGTH*sizeof(debugOpenQueueEntry_t));
+   return TRUE;
+}
 
 //======= called by any component
 
@@ -187,24 +187,46 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 
 //======= called by IEEE80215E
 
-OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
-   uint8_t i;
+OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cellType) {
+   uint16_t i,j=8;
+   uint16_t min=0;
    INTERRUPT_DECLARATION();
+   /*for(i=0;i<QUEUELENGTH;i++)
+   if (openqueue_vars.queue[i].creator != COMPONENT_UDPLATENCY)
+	  {
+		   openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
+		              				  (errorparameter_t)openqueue_vars.queue[i].l4_asn,
+		              				  (errorparameter_t)0);}*/
+  for (i=0;i<QUEUELENGTH;i++) {
+       	  if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY){
+       		  min = openqueue_vars.queue[i].l4_asn;
+      // 		  j=i;
+       	 if(min > openqueue_vars.queue[i+1].l4_asn){
+       	  	  min = openqueue_vars.queue[i+1].l4_asn;
+       		  j=i+1;
+       		 }
+       	  	  else{
+       	      min = openqueue_vars.queue[i].l4_asn;
+       	      j=i;
+       	     }}}
    DISABLE_INTERRUPTS();
-   if (toNeighbor->type==ADDR_64B) {
+    /*if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+    	  if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
-   } else if (toNeighbor->type==ADDR_ANYCAST) {
+   } else*/
+   //calcolo del minimo seqNum per pacchetti udplatency
+
+         if (toNeighbor->type==ADDR_ANYCAST && cellType == CELLTYPE_TXRX) {
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+         if (openqueue_vars.queue[i].creator!=COMPONENT_UDPLATENCY && openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
              ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
                 (
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
@@ -217,6 +239,33 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
          }
       }
    }
+
+   //controllo per pacchetti udplatency
+   else if (toNeighbor->type == ADDR_64B && cellType == CELLTYPE_TX) {
+         // anycast case: look for a packet which is either not created by RES
+         // or an KA (created by RES, but not broadcast)
+         for (i=0;i<QUEUELENGTH;i++) {
+            if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY &&
+            	openqueue_vars.queue[i].l4_asn == min &&
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E //&&
+            //openqueue_vars.queue[i].creator != COMPONENT_ICMPv6RPL &&
+            //openqueue_vars.queue[i].creator != COMPONENT_OPENBRIDGE &&
+            		/*( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
+                   (*
+                      openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
+                      packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
+                   )
+                )*/
+               ) {
+
+                openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
+                         		  		              				  (errorparameter_t)min,
+                         		  		              				  (errorparameter_t)j);
+               ENABLE_INTERRUPTS();
+               return &openqueue_vars.queue[i];
+            }
+         }
+      }
    ENABLE_INTERRUPTS();
    return NULL;
 }
@@ -243,7 +292,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[127]);
+   entry->payload                      = &(entry->packet[127-16]);
    entry->length                       = 0;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
@@ -258,13 +307,6 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //START OF TELEMATICS CODE
    entry->l2_security                  = FALSE;
    entry->l2_toDiscard                 = 0;
-//   uint8_t i;
-//   for(i=0;i<13;i++){
-//	   entry->l2_nonce[i] = 0;
-//	   entry->l2_key[i] = 0;
-//   }
-//   entry->l2_key[13] = 0;
-//   entry->l2_key[14] = 0;
-//   entry->l2_key[15] = 0;
    //END OF TELEMATICS CODE
+   entry->l4_asn					   = 0xffff;
 }

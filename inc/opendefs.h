@@ -85,6 +85,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =  5683,
    WKP_UDP_ECHO                        =     7,
+   WKP_UDP_LATENCY					   = 61001,
 };
 
 //status elements
@@ -157,6 +158,7 @@ enum {
    COMPONENT_UECHO                     = 0x22,
    //START OF TELEMATICS CODE
    COMPONENT_SECURITY                  = 0x23,
+   COMPONENT_UDPLATENCY				   = 0x24,
    //END OF TELEMATICS CODE
 };
 
@@ -231,7 +233,9 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+   //START OF TELEMATICS CODE
    ERR_SECURITY = 0x40,
+   //END OF TELEMATICS CODE
 };
 
 //=========================== typedef =========================================
@@ -279,6 +283,7 @@ typedef struct {
    uint16_t      l4_destination_port;            // l4 destination port
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
+   uint16_t		 l4_asn;
    //l3
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
@@ -313,6 +318,8 @@ typedef struct {
    uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
    uint8_t			 l2_length;                  //length of L2 payload
    uint8_t			 aData[128];				 //additional data for security
+   uint8_t			 clearText[128];			 //the payload in clear, used in case retransmission occurs
+   uint8_t			 clearText_length;			 //length of the packet in clear
    //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at

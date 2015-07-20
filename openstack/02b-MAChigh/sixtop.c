@@ -324,16 +324,16 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_frameType = IEEE154_TYPE_DATA;
    
    //START OF TELEMATICS CODE
-   msg->l2_security = TRUE;
+   msg->l2_security = FALSE;
    msg->l2_securityLevel = 7;
    msg->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
-      open_addr_t* temp_addr;
-      temp_addr = idmanager_getMyID(ADDR_64B);
-      memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-    }else{
-  	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
-    }
+	  open_addr_t* temp_addr;
+	  temp_addr = idmanager_getMyID(ADDR_64B);
+	  memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
+	}else{
+	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
+	}
    msg->l2_keyIndex = 1;
    //END OF TELEMATICS CODE
 
@@ -475,9 +475,9 @@ void task_sixtopNotifReceive() {
    msg->l2_joinPriorityPresent = FALSE; 
    
    //START OF TELEMATICS CODE
-//   if(msg->l2_security== TRUE){
-//	  security_incomingFrame(msg);
-//	  }
+   if(msg->l2_security== TRUE){
+	  security_incomingFrame(msg);
+	  }
    //END OF TELEMATICS CODE
 
    // send the packet up the stack, if it qualifies
@@ -547,18 +547,18 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_kaPeriod() {
-//   uint16_t output;
-//
-//   output = sixtop_vars.kaPeriod;
-//
-//   openserial_printStatus(
-//       STATUS_KAPERIOD,
-//       (uint8_t*)&output,
-//       sizeof(output)
-//   );
-//   return TRUE;
-//}
+bool debugPrint_kaPeriod() {
+   uint16_t output;
+
+   output = sixtop_vars.kaPeriod;
+
+   openserial_printStatus(
+       STATUS_KAPERIOD,
+       (uint8_t*)&output,
+       sizeof(output)
+   );
+   return TRUE;
+}
 
 //=========================== private =========================================
 
@@ -618,6 +618,12 @@ owerror_t sixtop_send_internal(
    //START OF TELEMATICS CODE
    if(msg->l2_security == FALSE){
 	   packetfunctions_reserveFooterSize(msg,2);
+   }
+   //save the L2_payload in clear, in case retransmission occurs
+   msg->clearText_length = msg->length;
+   uint8_t i;
+   for(i=0;i<msg->length;i++){
+	   msg->clearText[i] = msg->l2_payload[i];
    }
    //END OF TELEMATICS CODE
 

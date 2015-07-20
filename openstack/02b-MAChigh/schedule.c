@@ -4,6 +4,8 @@
 #include "openrandom.h"
 #include "packetfunctions.h"
 #include "sixtop.h"
+#include "idmanager.h"
+
 
 //=========================== variables =======================================
 
@@ -66,9 +68,1073 @@ void schedule_init() {
       );
       running_slotOffset++;
    }
-   
+/* Sono definiti prima gli slot in trasmissione e ricezione del DAG ROOT e poi singolarmente per ogni child*/
+   /*//chain
+   //DAG ROOT
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
+   running_slotOffset = SCHEDULE_NODE_START1;
+   for (i=0;i<1;i++) {
+   // slot tx 1° child
+	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x8a;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+ }
+  // slot rx 1° child
+      running_slotOffset = SCHEDULE_NODE_START2;
+      for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+       temp_neighbor.type            = ADDR_64B;
+       temp_neighbor.addr_64b[0]		= 0x00;
+       temp_neighbor.addr_64b[1]		= 0x12;
+       temp_neighbor.addr_64b[2]		= 0x4b;
+       temp_neighbor.addr_64b[3]		= 0x00;
+       temp_neighbor.addr_64b[4]		= 0x04;
+       temp_neighbor.addr_64b[5]		= 0x33;
+       temp_neighbor.addr_64b[6]		= 0xed;
+       temp_neighbor.addr_64b[7]		= 0x8a;
+       schedule_addActiveSlot(
+             running_slotOffset,      // slot offset
+             CELLTYPE_RX,          	 // type of slot
+             FALSE,                    // shared?
+             0,                       // channel offset
+             &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+   }
+   }
+//1 child
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x8a ){
+      running_slotOffset = SCHEDULE_NODE_START4;
+      for (i=0;i<1;i++) {
+
+  // slot tx 2° child
+	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x3c;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+   }
+      // slot tx dag root
+      running_slotOffset = SCHEDULE_NODE_START2;
+      for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+         temp_neighbor.type            = ADDR_64B;
+         temp_neighbor.addr_64b[0]		= 0x00;
+         temp_neighbor.addr_64b[1]		= 0x12;
+         temp_neighbor.addr_64b[2]		= 0x4b;
+         temp_neighbor.addr_64b[3]		= 0x00;
+         temp_neighbor.addr_64b[4]		= 0x04;
+         temp_neighbor.addr_64b[5]		= 0x33;
+         temp_neighbor.addr_64b[6]		= 0xec;
+         temp_neighbor.addr_64b[7]		= 0xd2;
+         schedule_addActiveSlot(
+               running_slotOffset,      // slot offset
+               CELLTYPE_TX,          	 // type of slot
+               FALSE,                    // shared?
+               0,                       // channel offset
+               &temp_neighbor           // neighbor
+            );
+            running_slotOffset++;
+      }
+
+   // slot rx 2° child
+   running_slotOffset = SCHEDULE_NODE_START3;
+   for (i=0;i<1;i++) {
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+         temp_neighbor.type            = ADDR_64B;
+         temp_neighbor.addr_64b[0]		= 0x00;
+         temp_neighbor.addr_64b[1]		= 0x12;
+         temp_neighbor.addr_64b[2]		= 0x4b;
+         temp_neighbor.addr_64b[3]		= 0x00;
+         temp_neighbor.addr_64b[4]		= 0x04;
+         temp_neighbor.addr_64b[5]		= 0x33;
+         temp_neighbor.addr_64b[6]		= 0xed;
+         temp_neighbor.addr_64b[7]		= 0x3c;
+         schedule_addActiveSlot(
+               running_slotOffset,      // slot offset
+               CELLTYPE_RX,          	 // type of slot
+               FALSE,                    // shared?
+               0,                       // channel offset
+               &temp_neighbor           // neighbor
+            );
+            running_slotOffset++;
+      }
+   running_slotOffset = SCHEDULE_NODE_START1;
+      for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+            temp_neighbor.type            = ADDR_64B;
+            temp_neighbor.addr_64b[0]		= 0x00;
+            temp_neighbor.addr_64b[1]		= 0x12;
+            temp_neighbor.addr_64b[2]		= 0x4b;
+            temp_neighbor.addr_64b[3]		= 0x00;
+            temp_neighbor.addr_64b[4]		= 0x04;
+            temp_neighbor.addr_64b[5]		= 0x33;
+            temp_neighbor.addr_64b[6]		= 0xec;
+            temp_neighbor.addr_64b[7]		= 0xd2;
+            schedule_addActiveSlot(
+                  running_slotOffset,      // slot offset
+                  CELLTYPE_RX,          	 // type of slot
+                  FALSE,                    // shared?
+                  0,                       // channel offset
+                  &temp_neighbor           // neighbor
+               );
+               running_slotOffset++;
+         }
+   }
+ //2° child
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x3c ){
+         running_slotOffset = SCHEDULE_NODE_START3;
+         for (i=0;i<1;i++) {
+
+     // slot tx 2° child
+   	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+         temp_neighbor.type            = ADDR_64B;
+         temp_neighbor.addr_64b[0]		= 0x00;
+         temp_neighbor.addr_64b[1]		= 0x12;
+         temp_neighbor.addr_64b[2]		= 0x4b;
+         temp_neighbor.addr_64b[3]		= 0x00;
+         temp_neighbor.addr_64b[4]		= 0x04;
+         temp_neighbor.addr_64b[5]		= 0x33;
+         temp_neighbor.addr_64b[6]		= 0xed;
+         temp_neighbor.addr_64b[7]		= 0x8a;
+         schedule_addActiveSlot(
+               running_slotOffset,      // slot offset
+               CELLTYPE_TX,          	 // type of slot
+               FALSE,                    // shared?
+               0,                       // channel offset
+               &temp_neighbor           // neighbor
+            );
+            running_slotOffset++;
+      }
+         // slot rx 1 child
+         running_slotOffset = SCHEDULE_NODE_START3;
+         for (i=0;i<1;i++) {
+         memset(&temp_neighbor,0,sizeof(temp_neighbor));
+            temp_neighbor.type            = ADDR_64B;
+            temp_neighbor.addr_64b[0]		= 0x00;
+            temp_neighbor.addr_64b[1]		= 0x12;
+            temp_neighbor.addr_64b[2]		= 0x4b;
+            temp_neighbor.addr_64b[3]		= 0x00;
+            temp_neighbor.addr_64b[4]		= 0x04;
+            temp_neighbor.addr_64b[5]		= 0x33;
+            temp_neighbor.addr_64b[6]		= 0xed;
+            temp_neighbor.addr_64b[7]		= 0x8a;
+            schedule_addActiveSlot(
+                  running_slotOffset,      // slot offset
+                  CELLTYPE_RX,          	 // type of slot
+                  FALSE,                    // shared?
+                  0,                       // channel offset
+                  &temp_neighbor           // neighbor
+               );
+               running_slotOffset++;
+         }
+   }*/
+   //star DAG ROOT
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
+      running_slotOffset = SCHEDULE_NODE_START1;
+      for (i=0;i<1;i++) {
+  // slot tx 1° child
+   	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+         temp_neighbor.type            = ADDR_64B;
+         temp_neighbor.addr_64b[0]		= 0x00;
+         temp_neighbor.addr_64b[1]		= 0x12;
+         temp_neighbor.addr_64b[2]		= 0x4b;
+         temp_neighbor.addr_64b[3]		= 0x00;
+         temp_neighbor.addr_64b[4]		= 0x04;
+         temp_neighbor.addr_64b[5]		= 0x33;
+         temp_neighbor.addr_64b[6]		= 0xed;
+         temp_neighbor.addr_64b[7]		= 0x8a;
+         schedule_addActiveSlot(
+               running_slotOffset,      // slot offset
+               CELLTYPE_TX,          	 // type of slot
+               FALSE,                    // shared?
+               0,                       // channel offset
+               &temp_neighbor           // neighbor
+            );
+            running_slotOffset++;
+
+      // slot tx 2° child
+         	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+               temp_neighbor.type            = ADDR_64B;
+               temp_neighbor.addr_64b[0]		= 0x00;
+               temp_neighbor.addr_64b[1]		= 0x12;
+               temp_neighbor.addr_64b[2]		= 0x4b;
+               temp_neighbor.addr_64b[3]		= 0x00;
+               temp_neighbor.addr_64b[4]		= 0x04;
+               temp_neighbor.addr_64b[5]		= 0x33;
+               temp_neighbor.addr_64b[6]		= 0xed;
+               temp_neighbor.addr_64b[7]		= 0x3c;
+               schedule_addActiveSlot(
+                     running_slotOffset,      // slot offset
+                     CELLTYPE_TX,          	 // type of slot
+                     FALSE,                    // shared?
+                     0,                       // channel offset
+                     &temp_neighbor           // neighbor
+                  );
+                  running_slotOffset++;
+
+ // slot tx 3° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xec;
+      temp_neighbor.addr_64b[7]		= 0xb1;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+ // slot tx 4° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x26;
+      schedule_addActiveSlot(
+    		running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+ // slot tx 5° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x6e;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+  // slot tx 6° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xec;
+      temp_neighbor.addr_64b[7]		= 0xfb;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+  // slot tx 7° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x35;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+  // slot tx 8° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x09;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+           );
+           running_slotOffset++;
+   //slot tx 9° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x89;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+           );
+           running_slotOffset++;
+   //slot tx 10° child
+  	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x22;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_TX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+
+}
+   }
+
+if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
+
+   running_slotOffset = SCHEDULE_NODE_RECEIVE1;
+   for (i=0;i<1;i++) {
+	   // slot rx 1° child
+	       //  running_slotOffset = SCHEDULE_NODE_RECEIVE2;
+	         memset(&temp_neighbor,0,sizeof(temp_neighbor));
+	         temp_neighbor.type            = ADDR_64B;
+	         temp_neighbor.addr_64b[0]		= 0x00;
+	         temp_neighbor.addr_64b[1]		= 0x12;
+	         temp_neighbor.addr_64b[2]		= 0x4b;
+	         temp_neighbor.addr_64b[3]		= 0x00;
+	         temp_neighbor.addr_64b[4]		= 0x04;
+	         temp_neighbor.addr_64b[5]		= 0x33;
+	         temp_neighbor.addr_64b[6]		= 0xed;
+	         temp_neighbor.addr_64b[7]		= 0x8a;
+	         schedule_addActiveSlot(
+	               running_slotOffset,      // slot offset
+	               CELLTYPE_RX,          	 // type of slot
+	               FALSE,                    // shared?
+	               0,                       // channel offset
+	               &temp_neighbor           // neighbor
+	            );
+	            running_slotOffset++;
+
+	   // slot rx 2° child
+    //  running_slotOffset = SCHEDULE_NODE_RECEIVE2;
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x3c;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+ // slot rx 3° child
+  // running_slotOffset = SCHEDULE_NODE_RECEIVE3;
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xec;
+      temp_neighbor.addr_64b[7]		= 0xb1;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+// slot rx 4° child
+     // running_slotOffset = SCHEDULE_NODE_RECEIVE4;
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x26;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+ // slot rx 5° child
+   //   running_slotOffset = SCHEDULE_NODE_RECEIVE5;
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x6e;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+ // slot rx 6° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xec;
+      temp_neighbor.addr_64b[7]		= 0xfb;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+         );
+         running_slotOffset++;
+ // slot rx 7° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x35;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+ // slot rx 8° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x09;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+ // slot rx 9° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x89;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+ // slot rx 10° child
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type            = ADDR_64B;
+      temp_neighbor.addr_64b[0]		= 0x00;
+      temp_neighbor.addr_64b[1]		= 0x12;
+      temp_neighbor.addr_64b[2]		= 0x4b;
+      temp_neighbor.addr_64b[3]		= 0x00;
+      temp_neighbor.addr_64b[4]		= 0x04;
+      temp_neighbor.addr_64b[5]		= 0x33;
+      temp_neighbor.addr_64b[6]		= 0xed;
+      temp_neighbor.addr_64b[7]		= 0x22;
+      schedule_addActiveSlot(
+            running_slotOffset,      // slot offset
+            CELLTYPE_RX,          	 // type of slot
+            FALSE,                    // shared?
+            0,                       // channel offset
+            &temp_neighbor           // neighbor
+          );
+          running_slotOffset++;
+
+}
+}
+
+  // child 1 tx e rx
+if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x8a ){
+   running_slotOffset = SCHEDULE_NODE_START1;
+   for (i=0;i<1;i++) {
+       // dedicated TX unicast slot
+       memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+             );
+             running_slotOffset++;
+       }
+
+    running_slotOffset = SCHEDULE_NODE_RECEIVE1;
+    for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+             );
+             running_slotOffset++;
+       }
+      }
+// child 2 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x3c ){
+   running_slotOffset = SCHEDULE_NODE_START2;
+   for (i=0;i<1;i++) {
+       // dedicated TX unicast slot
+       memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+             );
+             running_slotOffset++;
+       }
+
+    running_slotOffset = SCHEDULE_NODE_RECEIVE2;
+    for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+             );
+             running_slotOffset++;
+       }
+      }
+// child 3 tx e rx
+    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xb1 ){
+    running_slotOffset = SCHEDULE_NODE_START3;
+    for (i=0;i<1;i++) {
+     // dedicated TX unicast slot
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+             running_slotOffset++;
+      }
+
+    running_slotOffset = SCHEDULE_NODE_RECEIVE3;
+    for (i=0;i<1;i++) {
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+             );
+             running_slotOffset++;
+      }
+   }
+// child 4 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x26 ){
+   running_slotOffset = SCHEDULE_NODE_START4;
+   for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE4;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+ // child 5 tx e rx
+  if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x6e ){
+  running_slotOffset = SCHEDULE_NODE_START5;
+  for (i=0;i<1;i++) {
+    // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE5;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+    // child 6 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xfb ){
+   running_slotOffset = SCHEDULE_NODE_START6;
+   for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+          	  	running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE6;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+  // child 7 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x35 ){
+   running_slotOffset = SCHEDULE_NODE_START7;
+   for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE7;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+   // child 8 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x09 ){
+   running_slotOffset = SCHEDULE_NODE_START8;
+   for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE8;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+  // child 9 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x89 ){
+   running_slotOffset = SCHEDULE_NODE_START9;
+   for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE9;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+          running_slotOffset++;
+     }
+  }
+  // child 10 tx e rx
+   if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x22 ){
+   running_slotOffset = SCHEDULE_NODE_START10;
+    for (i=0;i<1;i++) {
+   // dedicated TX unicast slot
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_RX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+   }
+
+  running_slotOffset = SCHEDULE_NODE_RECEIVE10;
+  for (i=0;i<1;i++) {
+  memset(&temp_neighbor,0,sizeof(temp_neighbor));
+          temp_neighbor.type            = ADDR_64B;
+          temp_neighbor.addr_64b[0]		= 0x00;
+          temp_neighbor.addr_64b[1]		= 0x12;
+          temp_neighbor.addr_64b[2]		= 0x4b;
+          temp_neighbor.addr_64b[3]		= 0x00;
+          temp_neighbor.addr_64b[4]		= 0x04;
+          temp_neighbor.addr_64b[5]		= 0x33;
+          temp_neighbor.addr_64b[6]		= 0xec;
+          temp_neighbor.addr_64b[7]		= 0xd2;
+          schedule_addActiveSlot(
+                running_slotOffset,      // slot offset
+                CELLTYPE_TX,          	 // type of slot
+                FALSE,                    // shared?
+                0,                       // channel offset
+                &temp_neighbor           // neighbor
+              );
+              running_slotOffset++;
+     }
+  }
+
    // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type            = ADDR_64B;
    schedule_addActiveSlot(
       running_slotOffset,         // slot offset
       CELLTYPE_SERIALRX,          // type of slot
@@ -77,6 +1143,58 @@ void schedule_init() {
       &temp_neighbor              // neighbor
    );
    running_slotOffset++;
+
+   }
+
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_schedule() {
+   debugScheduleEntry_t temp;
+
+   // increment the row just printed
+   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+
+   // gather status data
+   temp.row                            = schedule_vars.debugPrintRow;
+   temp.slotOffset                     = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.type                           = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+   temp.shared                         = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.channelOffset                  = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   memcpy(
+      &temp.neighbor,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+      sizeof(open_addr_t)
+   );
+   temp.numRx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.numTx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.numTxACK                       = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   memcpy(
+      &temp.lastUsedAsn,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+      sizeof(asn_t)
+   );
+
+   // send status data over serial port
+   openserial_printStatus(
+      STATUS_SCHEDULE,
+      (uint8_t*)&temp,
+      sizeof(debugScheduleEntry_t)
+   );
+
+   return TRUE;
 }
 
 /**
@@ -87,73 +1205,22 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_schedule() {
-//   debugScheduleEntry_t temp;
-//
-//   // increment the row just printed
-//   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
-//
-//   // gather status data
-//   temp.row                            = schedule_vars.debugPrintRow;
-//   temp.slotOffset                     = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
-//   temp.type                           = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
-//   temp.shared                         = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
-//   temp.channelOffset                  = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-//   memcpy(
-//      &temp.neighbor,
-//      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
-//      sizeof(open_addr_t)
-//   );
-//   temp.numRx                          = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
-//   temp.numTx                          = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
-//   temp.numTxACK                       = \
-//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
-//   memcpy(
-//      &temp.lastUsedAsn,
-//      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-//      sizeof(asn_t)
-//   );
-//
-//   // send status data over serial port
-//   openserial_printStatus(
-//      STATUS_SCHEDULE,
-//      (uint8_t*)&temp,
-//      sizeof(debugScheduleEntry_t)
-//   );
-//
-//   return TRUE;
-//}
+bool debugPrint_backoff() {
+   uint8_t temp[2];
 
-/**
-\brief Trigger this module to print status information, over serial.
+   // gather status data
+   temp[0] = schedule_vars.backoffExponent;
+   temp[1] = schedule_vars.backoff;
 
-debugPrint_* functions are used by the openserial module to continuously print
-status information about several modules in the OpenWSN stack.
+   // send status data over serial port
+   openserial_printStatus(
+      STATUS_BACKOFF,
+      (uint8_t*)&temp,
+      sizeof(temp)
+   );
 
-\returns TRUE if this function printed something, FALSE otherwise.
-*/
-//bool debugPrint_backoff() {
-//   uint8_t temp[2];
-//
-//   // gather status data
-//   temp[0] = schedule_vars.backoffExponent;
-//   temp[1] = schedule_vars.backoff;
-//
-//   // send status data over serial port
-//   openserial_printStatus(
-//      STATUS_BACKOFF,
-//      (uint8_t*)&temp,
-//      sizeof(temp)
-//   );
-//
-//   return TRUE;
-//}
+   return TRUE;
+}
 
 //=== from 6top (writing the schedule)
 

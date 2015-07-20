@@ -33,6 +33,7 @@
 #include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
+#include "udplatency.h"
 //===== applications
 #include "openapps.h"
 
@@ -77,13 +78,16 @@ void openstack_init(void) {
    opentcp_init();
    openudp_init();
    opencoap_init();     // initialize before any of the CoAP applications
-   
+   udplatency_init();
    //===== applications
    openapps_init();
-   
+
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,
       (errorparameter_t)0
    );
+
+
+//   clock_set();
 }

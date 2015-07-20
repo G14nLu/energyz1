@@ -75,6 +75,22 @@ extern "C"
 #define PKA_STATUS_OPERATION_INPRG     7 // PKA operation is in progress.
 #define PKA_STATUS_OPERATION_NOT_INPRG 8 // No PKA operation is in progress.
 
+//ASM NOP in ccs and IAR
+#ifdef ccs
+#define ASM_NOP    asm(" NOP")
+#elif defined rvmdk
+#define ASM_NOP   __nop()
+#else
+#define ASM_NOP    asm("NOP")
+#endif
+
+//*****************************************************************************
+//
+// Variables to synchronize with interrupt handler
+//
+//*****************************************************************************
+uint8_t ui8PKAIntHandler;
+
 //*****************************************************************************
 //
 // A structure containing the pointers to the values of x and y co-ordinates of
@@ -157,6 +173,12 @@ extern tPKAStatus PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,
                                  tECCCurveInfo* ptCurve,
                                  uint32_t* pui32ResultVector);
 extern tPKAStatus PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResultLoc);
+
+
+uint8_t PKABigNumMod(uint32_t* pui32BNum, uint8_t ui8BNSize,
+        uint32_t* pui32Modulus, uint8_t ui8ModSize,
+        uint32_t* pui32ResultVector, //uint32_t* pui32ResultBuf,
+        uint8_t ui8Size, uint32_t* ui32ResVectorLoc);
 
 //*****************************************************************************
 //

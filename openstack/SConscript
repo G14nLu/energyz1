@@ -13,8 +13,6 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154E.c'),
     os.path.join('02a-MAClow','adaptive_sync.c'),
     os.path.join('02a-MAClow','security.c'),
-    os.path.join('02a-MAClow','ccmstar.c'),
-    os.path.join('02a-MAClow','TI_aes.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','otf.c'),
@@ -33,6 +31,7 @@ sources_c = [
     os.path.join('04-TRAN','opencoap.c'),
     os.path.join('04-TRAN','opentcp.c'),
     os.path.join('04-TRAN','openudp.c'),
+    os.path.join('04-TRAN','udplatency.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
     os.path.join('cross-layers','openqueue.c'),
@@ -47,8 +46,6 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154E.h'),
     os.path.join('02a-MAClow','adaptive_sync.h'),
     os.path.join('02a-MAClow','security.h'),
-    os.path.join('02a-MAClow','ccmstar.h'),
-    os.path.join('02a-MAClow','TI_aes.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','otf.h'),
@@ -67,6 +64,7 @@ sources_h = [
     os.path.join('04-TRAN','opencoap.h'),
     os.path.join('04-TRAN','opentcp.h'),
     os.path.join('04-TRAN','openudp.h'),
+    os.path.join('04-TRAN','udplantecy.h'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
     os.path.join('cross-layers','openqueue.h'),

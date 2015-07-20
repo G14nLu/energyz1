@@ -17,11 +17,36 @@
 
 The superframe repears over time and can be arbitrarly long.
 */
-#define SUPERFRAME_LENGTH    11 //should be 101
+#define SUPERFRAME_LENGTH    101 //should be 101
 
 #define NUMADVSLOTS          1
 #define NUMSHAREDTXRX        5 
+#define NUMDEDICATEDTX		 10
+#define NUMDEDICATEDRX		 10
 #define NUMSERIALRX          3
+//define slot in trasmissione
+#define SCHEDULE_NODE_START1		6
+#define SCHEDULE_NODE_START2		7
+#define SCHEDULE_NODE_START3		8
+#define SCHEDULE_NODE_START4		9
+#define SCHEDULE_NODE_START5		10
+#define SCHEDULE_NODE_START6		11
+#define SCHEDULE_NODE_START7		12
+#define SCHEDULE_NODE_START8		13
+#define SCHEDULE_NODE_START9		14
+#define SCHEDULE_NODE_START10		15
+
+//define slot in ricezione
+#define SCHEDULE_NODE_RECEIVE1   16
+#define SCHEDULE_NODE_RECEIVE2   17
+#define SCHEDULE_NODE_RECEIVE3   18
+#define SCHEDULE_NODE_RECEIVE4   19
+#define SCHEDULE_NODE_RECEIVE5   20
+#define SCHEDULE_NODE_RECEIVE6   21
+#define SCHEDULE_NODE_RECEIVE7   22
+#define SCHEDULE_NODE_RECEIVE8   23
+#define SCHEDULE_NODE_RECEIVE9   24
+#define SCHEDULE_NODE_RECEIVE10  25
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -33,7 +58,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMSERIALRX)
+#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMDEDICATEDTX+NUMDEDICATEDRX+NUMSERIALRX+6)
 
 /**
 \brief Minimum backoff exponent.

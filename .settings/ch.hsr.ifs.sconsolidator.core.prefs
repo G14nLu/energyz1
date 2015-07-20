@@ -1,0 +1,3 @@
+additionalCommandlineOptions=board\=OpenMote-CC2538 l2_security\=1 toolchain\=armgcc oos_openwsn
+ch.hsr.sconsolidator.core.BuildSettingsPreferencePage_useParentScope=false
+eclipse.preferences.version=1
