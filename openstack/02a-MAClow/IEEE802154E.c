@@ -1569,7 +1569,7 @@ port_INLINE void activity_ri6() {
    
    //START OF TELEMATICS CODE
    ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 3;
+   ieee154e_vars.ackToSend->l2_securityLevel = 7;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
 	   open_addr_t* temp_addr;
