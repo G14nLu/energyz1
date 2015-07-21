@@ -324,7 +324,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_frameType = IEEE154_TYPE_DATA;
    
    //START OF TELEMATICS CODE
-   msg->l2_security = FALSE;
+   msg->l2_security = TRUE;
    msg->l2_securityLevel = 7;
    msg->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
