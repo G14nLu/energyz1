@@ -270,8 +270,8 @@ void schedule_init() {
          temp_neighbor.addr_64b[3]		= 0x00;
          temp_neighbor.addr_64b[4]		= 0x04;
          temp_neighbor.addr_64b[5]		= 0x33;
-         temp_neighbor.addr_64b[6]		= 0xed;
-         temp_neighbor.addr_64b[7]		= 0x8a;
+         temp_neighbor.addr_64b[6]		= 0xec;
+         temp_neighbor.addr_64b[7]		= 0xae;
          schedule_addActiveSlot(
                running_slotOffset,      // slot offset
                CELLTYPE_TX,          	 // type of slot
@@ -471,8 +471,8 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
 	         temp_neighbor.addr_64b[3]		= 0x00;
 	         temp_neighbor.addr_64b[4]		= 0x04;
 	         temp_neighbor.addr_64b[5]		= 0x33;
-	         temp_neighbor.addr_64b[6]		= 0xed;
-	         temp_neighbor.addr_64b[7]		= 0x8a;
+	         temp_neighbor.addr_64b[6]		= 0xec;
+	         temp_neighbor.addr_64b[7]		= 0xae;
 	         schedule_addActiveSlot(
 	               running_slotOffset,      // slot offset
 	               CELLTYPE_RX,          	 // type of slot
@@ -662,7 +662,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
 }
 
   // child 1 tx e rx
-if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x8a ){
+if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xae ){
    running_slotOffset = SCHEDULE_NODE_START1;
    for (i=0;i<1;i++) {
        // dedicated TX unicast slot
