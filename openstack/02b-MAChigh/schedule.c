@@ -455,7 +455,7 @@ void schedule_init() {
           running_slotOffset++;
 
 }
-   }
+  }
 
 if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
 
@@ -708,6 +708,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xae ){
              running_slotOffset++;
        }
       }
+
 // child 2 tx e rx
    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x3c ){
    running_slotOffset = SCHEDULE_NODE_START2;
