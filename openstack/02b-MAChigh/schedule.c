@@ -280,7 +280,7 @@ void schedule_init() {
                &temp_neighbor           // neighbor
             );
             running_slotOffset++;
-
+/*
       // slot tx 2° child
          	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
                temp_neighbor.type            = ADDR_64B;
@@ -453,7 +453,7 @@ void schedule_init() {
             &temp_neighbor           // neighbor
           );
           running_slotOffset++;
-
+*/
 }
   }
 
@@ -481,7 +481,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
 	               &temp_neighbor           // neighbor
 	            );
 	            running_slotOffset++;
-
+/*
 	   // slot rx 2° child
     //  running_slotOffset = SCHEDULE_NODE_RECEIVE2;
       memset(&temp_neighbor,0,sizeof(temp_neighbor));
@@ -657,7 +657,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
             &temp_neighbor           // neighbor
           );
           running_slotOffset++;
-
+*/
 }
 }
 
@@ -708,7 +708,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xae ){
              running_slotOffset++;
        }
       }
-
+/*
 // child 2 tx e rx
    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x3c ){
    running_slotOffset = SCHEDULE_NODE_START2;
@@ -1132,7 +1132,7 @@ if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xae ){
               running_slotOffset++;
      }
   }
-
+*/
    // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type            = ADDR_64B;

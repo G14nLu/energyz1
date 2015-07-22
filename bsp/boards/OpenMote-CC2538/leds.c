@@ -45,32 +45,32 @@ void leds_init() {
 
 // red
 void    leds_error_on() {
-	bspLedSet(BSP_LED_1);
+	//bspLedSet(BSP_LED_1);
 }
 void    leds_error_off() {
-	bspLedClear(BSP_LED_1);
+//	bspLedClear(BSP_LED_1);
 }
 void    leds_error_toggle() {
-	bspLedToggle(BSP_LED_1);
+//	bspLedToggle(BSP_LED_1);
 }
 uint8_t leds_error_isOn() {
-	  uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_1);
-	  return (uint8_t)(ui32Toggle & BSP_LED_1)>>0;
+//	  uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_1);
+	//  return (uint8_t)(ui32Toggle & BSP_LED_1)>>0;
 }
 
 // orange
 void    leds_sync_on() {
-	bspLedSet(BSP_LED_2);
+	//bspLedSet(BSP_LED_2);
 }
 void    leds_sync_off() {
-	bspLedClear(BSP_LED_2);
+	//bspLedClear(BSP_LED_2);
 }
 void    leds_sync_toggle() {
-	bspLedToggle(BSP_LED_2);
+	//bspLedToggle(BSP_LED_2);
 }
 uint8_t leds_sync_isOn() {
-	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
-    return (uint8_t)(ui32Toggle & BSP_LED_2)>>1;
+	//uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
+   // return (uint8_t)(ui32Toggle & BSP_LED_2)>>1;
 }
 
 // green
@@ -84,8 +84,8 @@ void    leds_radio_toggle() {
 	bspLedToggle(BSP_LED_4);
 }
 uint8_t leds_radio_isOn() {
-	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_4);
-	return (uint8_t)(ui32Toggle & BSP_LED_4)>>2;
+//	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_4);
+	//return (uint8_t)(ui32Toggle & BSP_LED_4)>>2;
 }
 
 // yellow
@@ -105,13 +105,13 @@ uint8_t leds_debug_isOn() {
 
 // all
 void leds_all_on() {
-	bspLedSet(BSP_LED_ALL);
+//	bspLedSet(BSP_LED_ALL);
 }
 void leds_all_off() {
-	bspLedClear(BSP_LED_ALL);
+	//bspLedClear(BSP_LED_ALL);
 }
 void leds_all_toggle() {
-	bspLedToggle(BSP_LED_ALL);
+	//bspLedToggle(BSP_LED_ALL);
 }
 
 void leds_error_blink() {
@@ -123,9 +123,9 @@ void leds_error_blink() {
      
    // blink error LED for ~10s
    for (i=0;i<80;i++) {
-	  bspLedToggle(BSP_LED_1);
-      for (delay=0xffff;delay>0;delay--);
-      for (delay=0xffff;delay>0;delay--);
+	//  bspLedToggle(BSP_LED_1);
+     // for (delay=0xffff;delay>0;delay--);
+     // for (delay=0xffff;delay>0;delay--);
    }
 }
 
