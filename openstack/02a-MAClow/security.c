@@ -68,6 +68,7 @@ void security_init(){
 	//Initialization of Frame Counter
 	security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
 
+
 }
 
 //=========================== public ==========================================

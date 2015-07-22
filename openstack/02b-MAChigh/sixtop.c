@@ -326,7 +326,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    //START OF TELEMATICS CODE
    msg->l2_security = TRUE;
    msg->l2_securityLevel = 5;
-   msg->l2_keyIdMode = 3;
+   msg->l2_keyIdMode = 1;
    if(idmanager_getIsDAGroot()){
 	  open_addr_t* temp_addr;
 	  temp_addr = idmanager_getMyID(ADDR_64B);
