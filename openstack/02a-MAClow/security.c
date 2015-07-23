@@ -118,8 +118,7 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 	    memcpy(&(msg->l2_keySource), temp_keySource, sizeof(open_addr_t));
 		break;
 	case 1:
-		temp_keySource = &security_vars.m_macDefaultKeySource;
-		packetfunctions_writeAddress(msg,temp_keySource,sizeof(open_addr_t));
+		msg->l2_keySource = security_vars.m_macDefaultKeySource;
 		break;
 	case 2: //keySource with 16b address
 		temp_keySource = &msg->l2_keySource;
@@ -327,9 +326,8 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		tempheader->headerLength = tempheader->headerLength+2;
 		break;
 	case 1:
-		temp_addr = &security_vars.m_macDefaultKeySource;
-			    memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-				break;
+		msg->l2_keySource = security_vars.m_macDefaultKeySource;
+		break;
 	case 3:
 		packetfunctions_readAddress(
 							((uint8_t*)(msg->payload)+tempheader->headerLength),
@@ -754,8 +752,8 @@ void coordinatorORParent_init(void){
 //	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.macFrameCounter_5bytes.bytes0and1 = 0;
 //	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes2and3 = 0;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
-	security_vars.m_macDefaultKeySource.type = ADDR_64B;
-	security_vars.m_macDefaultKeySource = *(my);
+	//security_vars.m_macDefaultKeySource.type = ADDR_64B;
+	//security_vars.m_macDefaultKeySource = *(my);
 
 }
 
@@ -779,11 +777,11 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 	for(j=0;j<16;j++){
 		security_vars.MacKeyTable.KeyDescriptorElement[1].key[j] = security_vars.M_k[j];
 	}
-	security_vars.m_macDefaultKeySource.type = ADDR_64B;
-	security_vars.m_macDefaultKeySource = security_vars.m_macDefaultKeySource;
+	//security_vars.m_macDefaultKeySource.type = ADDR_64B;
+	//security_vars.m_macDefaultKeySource = security_vars.m_macDefaultKeySource;
 //	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
 //	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = *(src);
+	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = security_vars.m_macDefaultKeySource;;
 //	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter = 0;
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes0and1 = 0;
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes2and3 = 0;

@@ -327,13 +327,13 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_security = TRUE;
    msg->l2_securityLevel = 5;
    msg->l2_keyIdMode = 1;
-   if(idmanager_getIsDAGroot()){
+   /*if(idmanager_getIsDAGroot()){
 	  open_addr_t* temp_addr;
 	  temp_addr = idmanager_getMyID(ADDR_64B);
 	  memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
 	}else{
 	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
-	}
+	}*/
    msg->l2_keyIndex = 1;
    //END OF TELEMATICS CODE
 
