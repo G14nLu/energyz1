@@ -17,7 +17,7 @@
 
 The superframe repears over time and can be arbitrarly long.
 */
-#define SUPERFRAME_LENGTH    101 //should be 101
+#define SUPERFRAME_LENGTH    31 //should be 101
 
 #define NUMADVSLOTS          1
 #define NUMSHAREDTXRX        5 
@@ -58,7 +58,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMDEDICATEDTX+NUMDEDICATEDRX+NUMSERIALRX+6)
+#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMDEDICATEDTX+NUMDEDICATEDRX+NUMSERIALRX)
 
 /**
 \brief Minimum backoff exponent.
