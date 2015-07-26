@@ -105,6 +105,7 @@ void udplatency_task() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(seqNum));
    pkt->payload[0]    = (seqNum >> 8) & 0xff;
    pkt->payload[1]    = seqNum & 0xff;
+
    pkt->l4_asn = seqNum;
 
 
