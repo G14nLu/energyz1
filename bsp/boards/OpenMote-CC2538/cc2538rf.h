@@ -28,7 +28,7 @@
 #define CC2538_RF_CCA_BUSY                0
 /*---------------------------------------------------------------------------*/
 #ifdef CC2538_RF_CONF_TX_POWER
-#define CC2538_RF_TX_POWER 			    0x35//CC2538_RF_CONF_TX_POWER
+#define CC2538_RF_TX_POWER 			    0xD5//CC2538_RF_CONF_TX_POWER
 #else
 #define CC2538_RF_TX_POWER CC2538_RF_TX_POWER_RECOMMENDED
 #endif /* CC2538_RF_CONF_TX_POWER */
