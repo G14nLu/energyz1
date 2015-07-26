@@ -257,7 +257,7 @@ void schedule_init() {
                running_slotOffset++;
          }
    }*/
-   //star DAG ROOT
+  //star DAG ROOT
    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
       running_slotOffset = SCHEDULE_NODE_START1;
       for (i=0;i<1;i++) {
@@ -281,7 +281,7 @@ void schedule_init() {
             );
             running_slotOffset++;
 
-      // slot tx 2° child
+  // slot tx 2° child
          	  memset(&temp_neighbor,0,sizeof(temp_neighbor));
                temp_neighbor.type            = ADDR_64B;
                temp_neighbor.addr_64b[0]		= 0x00;
@@ -454,7 +454,7 @@ void schedule_init() {
           );
           running_slotOffset++;
 
-}
+   }
   }
 
 if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2 ){
