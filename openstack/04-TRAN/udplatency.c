@@ -14,7 +14,7 @@
 
 //=========================== defines =========================================
 
-#define UDPLATENCYPERIOD 500
+#define UDPLATENCYPERIOD 10000
 #define NUMPKTTEST 120
 
 //=========================== variables =======================================
