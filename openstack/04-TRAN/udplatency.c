@@ -14,7 +14,7 @@
 
 //=========================== defines =========================================
 
-#define UDPLATENCYPERIOD 10000
+#define UDPLATENCYPERIOD 1000
 #define NUMPKTTEST 120
 
 //=========================== variables =======================================
@@ -106,7 +106,7 @@ void udplatency_task() {
    pkt->payload[0]    = (seqNum >> 8) & 0xff;
    pkt->payload[1]    = seqNum & 0xff;
 
-   pkt->l4_asn = seqNum;
+   pkt->l4_sn = seqNum;
 
 
    // send packet
@@ -121,6 +121,11 @@ void udplatency_task() {
 
       opentimers_stop(udplatency_vars.timerId);
    }
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2){
+  	   openserial_printInfo(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
+  	                               (errorparameter_t)pkt->length,
+  	                               (errorparameter_t)0);
+     }
 }
 
 void udplatency_timer(void) {

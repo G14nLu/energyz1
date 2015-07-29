@@ -283,7 +283,9 @@ typedef struct {
    uint16_t      l4_destination_port;            // l4 destination port
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
-   uint16_t		 l4_asn;
+
+   uint16_t		 l4_sn;
+
    //l3
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 

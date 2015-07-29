@@ -194,13 +194,13 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cel
    //calcolo del minimo seqNum per pacchetti udplatency
    for (i=0;i<QUEUELENGTH;i++) {
        	  if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY){
-       		  min = openqueue_vars.queue[i].l4_asn;
-       	 if(min > openqueue_vars.queue[i+1].l4_asn){
-       	  	  min = openqueue_vars.queue[i+1].l4_asn;
+       		  min = openqueue_vars.queue[i].l4_sn;
+       	 if(min > openqueue_vars.queue[i+1].l4_sn){
+       	  	  min = openqueue_vars.queue[i+1].l4_sn;
        		  j=i+1;
        		 }
        	  	  else{
-       	      min = openqueue_vars.queue[i].l4_asn;
+       	      min = openqueue_vars.queue[i].l4_sn;
        	      j=i;
        	     }}}
    DISABLE_INTERRUPTS();
@@ -230,12 +230,12 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cel
          // or an KA (created by RES, but not broadcast)
          for (i=0;i<QUEUELENGTH;i++) {
             if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY &&
-            	openqueue_vars.queue[i].l4_asn == min &&
+            	openqueue_vars.queue[i].l4_sn == min &&
             openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E    ) {
 
                 openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
-                         		  		              				  (errorparameter_t)min,
-                         		  		              				  (errorparameter_t)j);
+                     (errorparameter_t)min,
+                     (errorparameter_t)j);
                ENABLE_INTERRUPTS();
                return &openqueue_vars.queue[i];
             }
@@ -243,6 +243,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cel
       }
    ENABLE_INTERRUPTS();
    return NULL;
+
 }
 
 OpenQueueEntry_t* openqueue_macGetAdvPacket() {
@@ -283,5 +284,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_security                  = FALSE;
    entry->l2_toDiscard                 = 0;
    //END OF TELEMATICS CODE
-   entry->l4_asn					   = 0xffff;
+   entry->l4_sn					   = 0xffff;
 }
