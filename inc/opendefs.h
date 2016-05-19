@@ -284,7 +284,7 @@ typedef struct {
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
 
-   uint16_t		 l4_sn;
+   uint16_t		 FIFO_seqNum;
 
    //l3
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
@@ -323,6 +323,7 @@ typedef struct {
    uint8_t			 clearText[128];			 //the payload in clear, used in case retransmission occurs
    uint8_t			 clearText_length;			 //length of the packet in clear
    //END OF TELEMATICS CODE
+   bool              isBroadcastIE;              //identify if it is a broadcast IE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet

@@ -37,9 +37,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    
    //START OF TELEMATICS CODE
-   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	   prepend_AuxiliarySecurityHeader(msg);
-   }
+//   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+//	   prepend_AuxiliarySecurityHeader(msg);
+//   }
    //END OF TELEMATICS CODE
 
    //General IEs here (those that are carried in all packets) -- None by now.
@@ -249,13 +249,13 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
 
    //START OF TELEMATICS CODE
    //if the security is enabled, the Auxiliary Security Header can be retrieved
-   if(ieee802514_header->securityEnabled == TRUE){
-	   msg->l2_security = TRUE;
-	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
-
-   }else{
-	   msg->l2_security = FALSE;
-   }
+//   if(ieee802514_header->securityEnabled == TRUE){
+//	   msg->l2_security = TRUE;
+//	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
+//
+//   }else{
+//	   msg->l2_security = FALSE;
+//   }
   //END OF TELEMATICS CODE
 
 

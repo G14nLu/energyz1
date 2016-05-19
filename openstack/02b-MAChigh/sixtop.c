@@ -18,6 +18,7 @@
 #include "schedule.h"
 //START OF TELEMATICS CODE
 #include "security.h"
+#include "udplatency.h"
 //END OF TELEMATICS CODE
 
 //=========================== variables =======================================
@@ -324,16 +325,16 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_frameType = IEEE154_TYPE_DATA;
    
    //START OF TELEMATICS CODE
+   if (!msg->isBroadcastIE){
+	   msg->l2_security = udplatency_getSecurity();
+   } else {
+	   msg->l2_security = FALSE;
+   }
+
    msg->l2_security = FALSE;
-   msg->l2_securityLevel = 5;
+
+   msg->l2_securityLevel = 7;
    msg->l2_keyIdMode = 1;
-   /*if(idmanager_getIsDAGroot()){
-	  open_addr_t* temp_addr;
-	  temp_addr = idmanager_getMyID(ADDR_64B);
-	  memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-	}else{
-	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
-	}*/
    msg->l2_keyIndex = 1;
    //END OF TELEMATICS CODE
 
@@ -473,12 +474,6 @@ void task_sixtopNotifReceive() {
    
    // reset it to avoid race conditions with this var.
    msg->l2_joinPriorityPresent = FALSE; 
-   
-   //START OF TELEMATICS CODE
-   if(msg->l2_security== TRUE){
-	  security_incomingFrame(msg);
-	  }
-   //END OF TELEMATICS CODE
 
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
@@ -490,11 +485,15 @@ void task_sixtopNotifReceive() {
         	 //discard duplicated packets
         	 if(msg->l2_toDiscard == 0){
         		 // send to upper layer
-        		 iphc_receive(msg);
+        		 if(msg->payload[0] == 0xAB){
+        			 trigger_receive(msg);
+        		 } else {
+        			 iphc_receive(msg);
+        		 }
         	 } else {
 			   openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
 								(errorparameter_t)msg->l2_toDiscard,
-								(errorparameter_t)501);
+								(errorparameter_t)502);
         	// free up the RAM
         		 openqueue_freePacketBuffer(msg);
         	 }
@@ -585,6 +584,7 @@ owerror_t sixtop_send_internal(
    // assign a number of retries
    if (
       packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
+	  && msg->isBroadcastIE == FALSE
       ) {
       msg->l2_retriesLeft = 1;
    } else {
@@ -629,6 +629,7 @@ owerror_t sixtop_send_internal(
 
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
+
    return E_SUCCESS;
 }
 

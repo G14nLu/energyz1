@@ -72,14 +72,27 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    
    // if you get here, I will try to allocate a buffer for you
    
-   // walk through queue and find free entry
-   for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-         openqueue_vars.queue[i].creator=creator;
-         openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
-         ENABLE_INTERRUPTS(); 
-         return &openqueue_vars.queue[i];
-      }
+   if(creator != COMPONENT_UDPLATENCY){
+	   // walk through queue and find free entry
+	   for (i=0;i<QUEUELENGTH;i++) {
+		  if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+			 openqueue_vars.queue[i].creator=creator;
+			 openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+			 ENABLE_INTERRUPTS();
+			 return &openqueue_vars.queue[i];
+		  }
+	   }
+   } else {
+	   // walk through queue and find free entry
+	   for (i=0;i<QUEUELENGTH-2;i++) {
+		  if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+			 openqueue_vars.queue[i].creator=creator;
+			 openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+			 ENABLE_INTERRUPTS();
+			 return &openqueue_vars.queue[i];
+		  }
+	   }
+
    }
    ENABLE_INTERRUPTS();
    return NULL;
@@ -187,31 +200,115 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 
 //======= called by IEEE80215E
 
-OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cellType) {
-   uint16_t i,j=8;
-   uint16_t min=0;
-   INTERRUPT_DECLARATION();
-   //calcolo del minimo seqNum per pacchetti udplatency
-   for (i=0;i<QUEUELENGTH;i++) {
-       	  if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY){
-       		  min = openqueue_vars.queue[i].l4_sn;
-       	 if(min > openqueue_vars.queue[i+1].l4_sn){
-       	  	  min = openqueue_vars.queue[i+1].l4_sn;
-       		  j=i+1;
-       		 }
-       	  	  else{
-       	      min = openqueue_vars.queue[i].l4_sn;
-       	      j=i;
-       	     }}}
-   DISABLE_INTERRUPTS();
+//OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,
+//		          	  	  	  	  	  	  	 uint8_t cellType,
+//											 uint8_t neighbor) {
+//   uint16_t j=8;
+//   uint8_t i;
+//   uint8_t pos;
+//   uint16_t min=0xffff;
+//   INTERRUPT_DECLARATION();
+//
+//   if( cellType == CELLTYPE_TX) {
+//	   //find the first udplatency packet
+//	   for (i = 0; i< QUEUELENGTH; i++){
+//		   if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY
+//			   && openqueue_vars.queue[i].l2_nextORpreviousHop.addr_64b[7] == neighbor
+//			   ){
+//			   min = openqueue_vars.queue[i].FIFO_seqNum;
+//			   j = pos = i;
+//			   break;
+//		   }
+//	   }
+//
+//	   //find the oldest
+//	   for ( i = j + 1; i< QUEUELENGTH; i++){
+//		   if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY
+//				   && openqueue_vars.queue[i].l2_nextORpreviousHop.addr_64b[7] == neighbor
+//				   ){
+//			   if(!idmanager_getIsDAGroot()){
+////			                   openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
+////			                   					(errorparameter_t)openqueue_vars.queue[i].FIFO_seqNum,
+////			   									(errorparameter_t)min);
+//			   }
+//			   if (openqueue_vars.queue[i].FIFO_seqNum < min
+//				   ){
+//				   min = openqueue_vars.queue[i].FIFO_seqNum;
+//				   pos = i;
+//			   }
+//		   }
+//	   }
+//
+//	   if(!idmanager_getIsDAGroot()){
+//	   }
+//   }
+//
+//   DISABLE_INTERRUPTS();
+//
+//    if (toNeighbor->type==ADDR_ANYCAST && cellType == CELLTYPE_TXRX) {
+//      // anycast case: look for a packet which is either not created by RES
+//      // or an KA (created by RES, but not broadcast)
+//      for (i=0;i<QUEUELENGTH;i++) {
+//         if (openqueue_vars.queue[i].creator!=COMPONENT_UDPLATENCY
+//        	   && openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E
+//        	   && ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
+//                (
+//                   openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
+//                   packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
+//                )
+//             )
+//            ) {
+//            ENABLE_INTERRUPTS();
+//            return &openqueue_vars.queue[i];
+//         }
+//      }
+//   }
+//
+//   //controllo per pacchetti udplatency
+//   else if (toNeighbor->type == ADDR_64B && cellType == CELLTYPE_TX) {
+//
+//         for (i=0;i<QUEUELENGTH;i++) {
+//            if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY
+//            	&& openqueue_vars.queue[i].FIFO_seqNum == min
+//				&& openqueue_vars.queue[i].l2_nextORpreviousHop.addr_64b[7] == neighbor
+//                && openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E
+//				) {
+//
+////            	if(!idmanager_getIsDAGroot()){
+////                openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
+////                					(errorparameter_t)min,
+////									(errorparameter_t)openqueue_vars.queue[i].length);
+////            	}
+//               ENABLE_INTERRUPTS();
+//               return &openqueue_vars.queue[i];
+//            }
+//         }
+//      }
+//
+//   ENABLE_INTERRUPTS();
+//   return NULL;
+//
+//}
 
-    if (toNeighbor->type==ADDR_ANYCAST && cellType == CELLTYPE_TXRX) {
+OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   if (toNeighbor->type==ADDR_64B) {
+      // a neighbor is specified, look for a packet unicast to that neigbhbor
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
+   } else if (toNeighbor->type==ADDR_ANYCAST) {
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].creator!=COMPONENT_UDPLATENCY
-        	   && openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E
-        	   && ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
                 (
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
@@ -223,27 +320,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor,uint8_t cel
          }
       }
    }
-
-   //controllo per pacchetti udplatency
-   else if (toNeighbor->type == ADDR_64B && cellType == CELLTYPE_TX) {
-         // anycast case: look for a packet which is either not created by RES
-         // or an KA (created by RES, but not broadcast)
-         for (i=0;i<QUEUELENGTH;i++) {
-            if (openqueue_vars.queue[i].creator == COMPONENT_UDPLATENCY &&
-            	openqueue_vars.queue[i].l4_sn == min &&
-            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E    ) {
-
-                openserial_printInfo(COMPONENT_UDPLATENCY,ERR_SECURITY,
-                     (errorparameter_t)min,
-                     (errorparameter_t)j);
-               ENABLE_INTERRUPTS();
-               return &openqueue_vars.queue[i];
-            }
-         }
-      }
    ENABLE_INTERRUPTS();
    return NULL;
-
 }
 
 OpenQueueEntry_t* openqueue_macGetAdvPacket() {
@@ -284,5 +362,6 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_security                  = FALSE;
    entry->l2_toDiscard                 = 0;
    //END OF TELEMATICS CODE
-   entry->l4_sn					   = 0xffff;
+   entry->FIFO_seqNum				   = 0xffff;
+   entry->isBroadcastIE                = FALSE;
 }

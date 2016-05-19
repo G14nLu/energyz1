@@ -87,7 +87,7 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 	bool frameCounterSuppression;
 	uint8_t temp8b;
 
-	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
+	frameCounterSuppression = 1; //the frame counter is carried in the frame, otherwise 1;
 
 	//max length of MAC frames
 	// length of authentication Tag
@@ -141,15 +141,17 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 	//save the pointer. The ASN will be added by activity_ti1OrR11 procedure
 
     // reserve space
-    packetfunctions_reserveHeaderSize(
-	  msg,
-	  sizeof(macFrameCounter_t)
-    );
+	if(frameCounterSuppression == 0){
+		packetfunctions_reserveHeaderSize(
+		  msg,
+		  sizeof(macFrameCounter_t)
+		);
 
-    // Keep a pointer to where the ASN will be
-    // Note: the actual value of the current ASN will be written by the
-    //    IEEE802.15.4e when transmitting
-    msg->l2_ASNFrameCounter = msg->payload;
+		// Keep a pointer to where the ASN will be
+		// Note: the actual value of the current ASN will be written by the
+		//    IEEE802.15.4e when transmitting
+		msg->l2_ASNFrameCounter = msg->payload;
+	}
 
 	//security control field
 	packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
@@ -240,7 +242,7 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 		}
 
 	for(i=0;i<5;i++){
-		nonce[8+i] = 0;//vectASN[i];
+		nonce[8+i] = vectASN[i];
 	}
 
 	//aData string
@@ -451,7 +453,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	uint8_t myASN[5];
 	ieee154e_getAsn(myASN);
 	for(i=0;i<5;i++){
-		nonce[8+i] = 0;//myASN[i];
+		nonce[8+i] = myASN[i];
 	}
 
 //	asn_t now;

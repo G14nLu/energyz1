@@ -16,7 +16,7 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define MY_ID 0x00
+#define MY_ID 0x03
 
 //===== interrupt state
 

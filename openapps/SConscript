@@ -8,17 +8,17 @@ localEnv      = env.Clone()
 
 # apps which should always be present
 defaultApps   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
+    #'c6t',
+    #'cinfo',
+    #'cleds',
+    #'cwellknown',
     'techo',
     'uecho',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
-        'cexample',
-        'cstorm',
+        #'cexample',
+        #'cstorm',
     ]
 
 # additional apps the user wants to build

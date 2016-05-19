@@ -9,12 +9,14 @@
 #include "schedule.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
+#include "schedule.h"
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+#include "topology.h"
 
 //=========================== variables =======================================
 
@@ -90,6 +92,10 @@ bool     debugPrint_isSync(void);
 // interrupts
 void     isr_ieee154e_newSlot(void);
 void     isr_ieee154e_timer(void);
+
+bool ieee154e_isRightSlot(open_addr_t dst);
+uint8_t ieee154e_findUDPLatencyDestination(void);
+uint16_t ieee154e_getSlotOffset(void);
 
 //=========================== admin ===========================================
 
@@ -172,7 +178,7 @@ void isr_ieee154e_newSlot() {
       if (idmanager_getIsDAGroot()==TRUE) {
        	 //START OF TELEMATICS CODE
 		 //If I'm the DAG Root, here I can store the Key
-		 coordinatorORParent_init();
+		 //coordinatorORParent_init();
 		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
@@ -430,7 +436,7 @@ port_INLINE void activity_synchronize_newSlot() {
    
    // increment ASN (used only to schedule serial activity)
    incrementAsnOffset();
-   
+
    // to be able to receive and transmist serial even when not synchronized
    // take turns every 8 slots sending and receiving
    if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
@@ -539,10 +545,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       //START OF TELEMATICS CODE
       //if I'm not the DAG Root and I'm not synch, I can store the Key
-  	  if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
-  		 && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
-  		  remote_init(ieee802514_header);
-  	  }
+//  	  if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
+//  		 && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
+//  		  remote_init(ieee802514_header);
+//  	  }
   	  //END OF TELEMATICS CODE
 
       // break if invalid IEEE802.15.4 header
@@ -767,13 +773,13 @@ port_INLINE void activity_ti1ORri1() {
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
-   
+
    // wiggle debug pins
    debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
    }
-   
+
    // desynchronize if needed
    if (idmanager_getIsDAGroot()==FALSE) {
       ieee154e_vars.deSyncTimeout--;
@@ -806,7 +812,20 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
-   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
+//   if(ieee154e_vars.slotOffset == SCHEDULE_NODE_RECEIVE1){
+//	  openserial_printInfo(255,157,
+//				   (errorparameter_t)ieee154e_vars.slotOffset,
+//				   (errorparameter_t)ieee154e_vars.nextActiveSlotOffset);
+//   }
+
+   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset
+		) {
+
+//	   if(ieee154e_vars.slotOffset == SCHEDULE_NODE_RECEIVE1){
+//		  openserial_printInfo(255,158,
+//					   (errorparameter_t)ieee154e_vars.slotOffset,
+//					   (errorparameter_t)ieee154e_vars.slotOffset);
+//	   }
       // this is the next active slot
       
       // advance the schedule
@@ -816,6 +835,11 @@ port_INLINE void activity_ti1ORri1() {
       ieee154e_vars.nextActiveSlotOffset    = schedule_getNextActiveSlotOffset();
    } else {
       // this is NOT the next active slot, abort
+	   //if(ieee154e_vars.slotOffset == SCHEDULE_NODE_RECEIVE1){
+//		  openserial_printInfo(255,159,
+//					   (errorparameter_t)ieee154e_vars.slotOffset,
+//					   (errorparameter_t)ieee154e_vars.nextActiveSlotOffset);
+	   //}
       // stop using serial
       openserial_stop();
       // abort the slot
@@ -824,7 +848,7 @@ port_INLINE void activity_ti1ORri1() {
       openserial_startOutput();
       return;
    }
-   
+
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
@@ -864,12 +888,23 @@ port_INLINE void activity_ti1ORri1() {
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, cellType);
+//            uint8_t scheduledNeighbor;
+//            scheduledNeighbor = ieee154e_findUDPLatencyDestination();
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+            //TODO
+            //decide if it the right slot for this packet
+            if(ieee154e_vars.dataToSend->creator == COMPONENT_UDPLATENCY){
+
+//				if(!ieee154e_isRightSlot(ieee154e_vars.dataToSend->l2_nextORpreviousHop)){
+//					ieee154e_vars.dataToSend = NULL;
+//				}
+            }
          } else {
             ieee154e_vars.dataToSend = NULL;
          }
          if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
-            // change state
+
+        	// change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
@@ -884,22 +919,18 @@ port_INLINE void activity_ti1ORri1() {
              * Note that if this is not the first attempt, the
              * clearText has to be encrypted again.
 */
-            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-            	//if it is a retransmission, recover the clearText packet
-            	if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
-					 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
-//					 uint8_t i;
-//					 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
-//						ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
-//					 }
-					 memcpy(&ieee154e_vars.dataToSend->l2_payload[0],
-							&ieee154e_vars.dataToSend->clearText[0],
-							ieee154e_vars.dataToSend->length);
-				 }
-
-            	security_outgoingFrame(ieee154e_vars.dataToSend);
-            	packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
-            }
+//            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+//            	//if it is a retransmission, recover the clearText packet
+//            	//if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
+//					 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
+//					 memcpy(&ieee154e_vars.dataToSend->l2_payload[0],
+//							&ieee154e_vars.dataToSend->clearText[0],
+//							ieee154e_vars.dataToSend->length);
+//				 //}
+//
+//            	security_outgoingFrame(ieee154e_vars.dataToSend);
+//            	packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+//            }
             //END OF TELEMATICS CODE
 
 
@@ -1018,6 +1049,13 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXDATA);
    
+//   if(ieee154e_vars.dataToSend->isBroadcastIE == TRUE){
+//	   // log the error
+//	   openserial_printError(COMPONENT_IEEE802154E,255,
+//	                         (errorparameter_t)255,
+//	                         (errorparameter_t)ieee154e_vars.dataToSend->l2_retriesLeft);
+//   }
+
    // cancel tt3
    radiotimer_cancel();
    
@@ -1055,7 +1093,9 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee154e_vars.lastCapturedTime = capturedTime;
    
    // decides whether to listen for an ACK
-   if (packetfunctions_isBroadcastMulticast(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)==TRUE) {
+   if (packetfunctions_isBroadcastMulticast(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)==TRUE
+	   && ieee154e_vars.dataToSend->isBroadcastIE == FALSE
+   ) {
       listenForAck = FALSE;
    } else {
       listenForAck = TRUE;
@@ -1259,9 +1299,9 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
 
       //START OF TELEMATICS CODE
-	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.ackReceived);
-	   }
+//	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
+//		  security_incomingFrame(ieee154e_vars.ackReceived);
+//	   }
 	   //END OF TELEMATICS CODE
 
       //hanlde IEs --xv poipoi
@@ -1568,8 +1608,8 @@ port_INLINE void activity_ri6() {
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
    //START OF TELEMATICS CODE
-   ieee154e_vars.ackToSend->l2_security = FALSE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 5;
+   ieee154e_vars.ackToSend->l2_security = TRUE;
+   ieee154e_vars.ackToSend->l2_securityLevel = 7;
    ieee154e_vars.ackToSend->l2_keyIdMode = 1;
    if(idmanager_getIsDAGroot()){
 	   open_addr_t* temp_addr;
@@ -1603,9 +1643,9 @@ port_INLINE void activity_ri6() {
                             );
    
    //START OF TELEMATICS CODE
-   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	   security_outgoingFrame(ieee154e_vars.ackToSend);
-	  }
+//   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+//	   security_outgoingFrame(ieee154e_vars.ackToSend);
+//	  }
    //END OF TELEMATICS CODE
 
    // space for 2-byte CRC
@@ -2167,4 +2207,84 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
+}
+
+//bool ieee154e_isRightSlot(open_addr_t dst){
+//
+//	//decide if this slot is ok for this packet
+//	switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
+//	case TOPOLOGY_ROOT:
+//		if(ieee154e_vars.slotOffset == SCHEDULE_NODE_START1
+//				&& dst.addr_64b[7] == TOPOLOGY_CHILD_1 ){
+////        	openserial_printInfo(
+////        	   COMPONENT_IEEE802154E,
+////        	   254,
+////        	   (errorparameter_t)dst.addr_64b[7],
+////        	   (errorparameter_t)ieee154e_vars.slotOffset
+////        	);
+//			return TRUE;
+//		}
+//		break;
+//	case TOPOLOGY_CHILD_1:
+//		if((ieee154e_vars.slotOffset == SCHEDULE_NODE_RECEIVE1 && dst.addr_64b[7] == TOPOLOGY_ROOT)
+//		   //|| (ieee154e_vars.slotOffset == 26 && dst.addr_64b[7] == TOPOLOGY_CHILD_2)
+//				){
+////        	openserial_printInfo(
+////        	   COMPONENT_IEEE802154E,
+////        	   254,
+////        	   (errorparameter_t)dst.addr_64b[7],
+////        	   (errorparameter_t)ieee154e_vars.slotOffset
+////        	);
+//			return TRUE;
+//		}
+//		break;
+//	case TOPOLOGY_CHILD_2:
+//		if(ieee154e_vars.slotOffset == 27 && dst.addr_64b[7] == TOPOLOGY_CHILD_1 ){
+////        	openserial_printInfo(
+////        	   COMPONENT_IEEE802154E,
+////        	   254,
+////        	   (errorparameter_t)dst.addr_64b[7],
+////        	   (errorparameter_t)ieee154e_vars.slotOffset
+////        	);
+//			return TRUE;
+//		}
+//		break;
+//	default:
+//    	openserial_printInfo(
+//    	   COMPONENT_IEEE802154E,
+//    	   253,
+//    	   (errorparameter_t)dst.addr_64b[7],
+//    	   (errorparameter_t)ieee154e_vars.slotOffset
+//    	);
+//		return FALSE;
+//	}
+//
+//	return FALSE;
+//}
+//
+//uint8_t ieee154e_findUDPLatencyDestination(void){
+//
+//	uint8_t neighbor;
+//
+//	switch(ieee154e_vars.slotOffset){
+//	//STAR TOPOLOGY
+//	case SCHEDULE_NODE_START1: //ROOT - CHILD_1
+//		neighbor = TOPOLOGY_CHILD_1;
+//		break;
+//	case SCHEDULE_NODE_RECEIVE1: //CHILD_1 - ROOT
+//		neighbor = TOPOLOGY_ROOT;
+//		break;
+//	case 26:
+//		neighbor = TOPOLOGY_CHILD_2;
+//		break;
+//	case 27:
+//		neighbor = TOPOLOGY_CHILD_1;
+//		break;
+//	}
+//
+//	return neighbor;
+//}
+
+uint16_t ieee154e_getSlotOffset(void){
+	return ieee154e_vars.slotOffset;
 }

@@ -25,7 +25,7 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define ADVTIMEOUT                  30 // in seconds: sending ADV every 30 seconds
+#define ADVTIMEOUT                  10 // in seconds: sending ADV every 30 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -130,16 +130,16 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131,//-45,                //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,//-108-15,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,//-180,// 15000us
+   TsTxOffset                =  131-5,                 //  4000us
+   TsLongGT                  =   43,                   //  1300us
+   TsTxAckDelay              =  151-100-4,             //  4606us
+   TsShortGT                 =   16,                   //   500us
+   TsSlotDuration            =  PORT_TsSlotDuration-60,// 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
    maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-   maxTxAckPrepare           =  PORT_maxTxAckPrepare,//-15,
+   maxTxAckPrepare           =  PORT_maxTxAckPrepare-4,
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening

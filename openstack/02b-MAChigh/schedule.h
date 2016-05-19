@@ -15,38 +15,47 @@
 /**
 \brief The length of the superframe, in slots.
 
-The superframe repears over time and can be arbitrarly long.
+The superframe repeats over time and can be arbitrarly long.
 */
-#define SUPERFRAME_LENGTH    31 //should be 101
+#define SUPERFRAME_LENGTH    11 //should be 101
 
 #define NUMADVSLOTS          1
-#define NUMSHAREDTXRX        5 
-#define NUMDEDICATEDTX		 10
-#define NUMDEDICATEDRX		 10
-#define NUMSERIALRX          3
-//define slot in trasmissione
-#define SCHEDULE_NODE_START1		6
-#define SCHEDULE_NODE_START2		7
-#define SCHEDULE_NODE_START3		8
-#define SCHEDULE_NODE_START4		9
-#define SCHEDULE_NODE_START5		10
-#define SCHEDULE_NODE_START6		11
-#define SCHEDULE_NODE_START7		12
-#define SCHEDULE_NODE_START8		13
-#define SCHEDULE_NODE_START9		14
-#define SCHEDULE_NODE_START10		15
-
-//define slot in ricezione
-#define SCHEDULE_NODE_RECEIVE1   16
-#define SCHEDULE_NODE_RECEIVE2   17
-#define SCHEDULE_NODE_RECEIVE3   18
-#define SCHEDULE_NODE_RECEIVE4   19
-#define SCHEDULE_NODE_RECEIVE5   20
-#define SCHEDULE_NODE_RECEIVE6   21
-#define SCHEDULE_NODE_RECEIVE7   22
-#define SCHEDULE_NODE_RECEIVE8   23
-#define SCHEDULE_NODE_RECEIVE9   24
-#define SCHEDULE_NODE_RECEIVE10  25
+#define NUMSHAREDTXRX        4
+//#define NUMDEDICATEDTX		 14
+//#define NUMDEDICATEDRX		 14
+#define NUMSERIALRX          1
+//
+////define slot in trasmissione
+//#define SCHEDULE_NODE_START1		6
+//#define SCHEDULE_NODE_START2		7
+//#define SCHEDULE_NODE_START3		8
+//#define SCHEDULE_NODE_START4		9
+//#define SCHEDULE_NODE_START5		10
+//#define SCHEDULE_NODE_START6		11
+//#define SCHEDULE_NODE_START7		12
+//#define SCHEDULE_NODE_START8		13
+//#define SCHEDULE_NODE_START9		14
+//#define SCHEDULE_NODE_START10		15
+//#define SCHEDULE_NODE_START11		16
+//#define SCHEDULE_NODE_START12		17
+//#define SCHEDULE_NODE_START13		18
+//#define SCHEDULE_NODE_START14		19
+//
+////define slot in ricezione
+//#define SCHEDULE_NODE_RECEIVE1   20
+//#define SCHEDULE_NODE_RECEIVE2   21
+//#define SCHEDULE_NODE_RECEIVE3   22
+//#define SCHEDULE_NODE_RECEIVE4   23
+//#define SCHEDULE_NODE_RECEIVE5   24
+//#define SCHEDULE_NODE_RECEIVE6   25
+//#define SCHEDULE_NODE_RECEIVE7   26
+//#define SCHEDULE_NODE_RECEIVE8   27
+//#define SCHEDULE_NODE_RECEIVE9   28
+//#define SCHEDULE_NODE_RECEIVE10  29
+//#define SCHEDULE_NODE_RECEIVE11  30
+//#define SCHEDULE_NODE_RECEIVE12  31
+//#define SCHEDULE_NODE_RECEIVE13  32
+//#define SCHEDULE_NODE_RECEIVE14  33
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -58,7 +67,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMDEDICATEDTX+NUMDEDICATEDRX+NUMSERIALRX)
+#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMSERIALRX)
 
 /**
 \brief Minimum backoff exponent.
@@ -89,13 +98,13 @@ typedef uint16_t   slotOffset_t;
 typedef uint16_t   frameLength_t;
 
 typedef enum {
-   CELLTYPE_OFF              = 0,
-   CELLTYPE_ADV              = 1,
-   CELLTYPE_TX               = 2,
-   CELLTYPE_RX               = 3,
-   CELLTYPE_TXRX             = 4,
-   CELLTYPE_SERIALRX         = 5,
-   CELLTYPE_MORESERIALRX     = 6
+   CELLTYPE_OFF              = 255,
+   CELLTYPE_ADV              = 0,
+   CELLTYPE_TX               = 1,
+   CELLTYPE_RX               = 2,
+   CELLTYPE_TXRX             = 3,
+   CELLTYPE_SERIALRX         = 4,
+   CELLTYPE_MORESERIALRX     = 5
 } cellType_t;
 
 typedef struct {

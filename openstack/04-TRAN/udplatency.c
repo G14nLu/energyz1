@@ -11,32 +11,39 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 #include "neighbors.h"
+#include "sixtop.h"
+#include "scheduler.h"
 
 //=========================== defines =========================================
 
-#define UDPLATENCYPERIOD 1000
-#define NUMPKTTEST 120
+//#define UDPLATENCYPERIOD 30
+//#define NUMPKTTEST 120
 
 //=========================== variables =======================================
 
-typedef struct {
-   opentimer_id_t  timerId;
-} udplatency_vars_t;
-
 udplatency_vars_t udplatency_vars;
-uint16_t          seqNum;
 //=========================== prototypes ======================================
 
 void udplatency_timer(void);
+void udplatency_pushTimer(void);
+void udplatency_PushTask(void);
+void trigger_forward(void);
 
 //=========================== public ==========================================
 
 void udplatency_init(void) {
-   seqNum = 0;
-   udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
-                                            TIMER_PERIODIC,TIME_MS,
-                                            udplatency_timer);
-   }
+   udplatency_vars.seqNum_my     		= 0;
+   udplatency_vars.seqNum_global 		= 0;
+   udplatency_vars.udplatency_security 	= 0;
+   udplatency_vars.triggerReceived 		= 0;
+
+   udplatency_vars.UDPLATENCYPERIOD = 4000;
+   udplatency_vars.NUMPKTTEST = 10;
+
+   udplatency_vars.timerId    = opentimers_start(udplatency_vars.UDPLATENCYPERIOD,
+   												TIMER_PERIODIC,TIME_MS,
+   												udplatency_timer);
+}
 
 void udplatency_task() {
    OpenQueueEntry_t* pkt;
@@ -58,10 +65,11 @@ void udplatency_task() {
 //	   openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
 //                            (errorparameter_t)0,
 //                            (errorparameter_t)0);
+	   // increment seqNum, PLR stats on OV
+	   udplatency_vars.seqNum_my++;
+	   udplatency_vars.seqNum_global++;
       return;
    }
-
-
 
    pkt->creator                     = COMPONENT_UDPLATENCY;
    pkt->owner                       = COMPONENT_UDPLATENCY;
@@ -102,11 +110,21 @@ void udplatency_task() {
    }
 
    // insert Sequence Number
-   packetfunctions_reserveHeaderSize(pkt,sizeof(seqNum));
-   pkt->payload[0]    = (seqNum >> 8) & 0xff;
-   pkt->payload[1]    = seqNum & 0xff;
+   packetfunctions_reserveHeaderSize(pkt,sizeof(udplatency_vars.seqNum_global));
+   pkt->payload[0]    = (udplatency_vars.seqNum_global >> 8) & 0xff;
+   pkt->payload[1]    = udplatency_vars.seqNum_global & 0xff;
 
-   pkt->l4_sn = seqNum;
+   pkt->FIFO_seqNum = udplatency_vars.seqNum_my;
+
+   openserial_printInfo(COMPONENT_UDPLATENCY,155,
+					   (errorparameter_t)pkt->FIFO_seqNum,
+					   (errorparameter_t)100);
+   //127 bytes payload
+   uint8_t i;
+   for (i = 0; i < 16; i++){
+	   packetfunctions_reserveHeaderSize(pkt,1);
+	   pkt->payload[0] = i;
+   }
 
 
    // send packet
@@ -115,21 +133,35 @@ void udplatency_task() {
    }
 
    // increment seqNum
-   seqNum++;
-   // close timer when test finish
-   if (seqNum > NUMPKTTEST) {
+   udplatency_vars.seqNum_my++;
+   udplatency_vars.seqNum_global++;
 
-      opentimers_stop(udplatency_vars.timerId);
+   // close timer when test finish
+   if (udplatency_vars.seqNum_my > udplatency_vars.NUMPKTTEST) {
+	   udplatency_vars.triggerReceived = FALSE;
+	   udplatency_vars.seqNum_my = 0;
+	   udplatency_vars.seqNum_global = 0;
+       opentimers_stop(udplatency_vars.timerId);
    }
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0xd2){
-  	   openserial_printInfo(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
-  	                               (errorparameter_t)pkt->length,
-  	                               (errorparameter_t)0);
-     }
+
 }
 
 void udplatency_timer(void) {
   scheduler_push_task(udplatency_task,TASKPRIO_COAP);
+}
+
+void udplatency_pushTimer(void){
+  scheduler_push_task(udplatency_PushTask,TASKPRIO_SIXTOP);
+}
+
+void udplatency_forwardTimer(void){
+	scheduler_push_task(trigger_forward,TASKPRIO_SIXTOP);
+}
+
+void udplatency_PushTask(void){
+	udplatency_vars.timerId    = opentimers_start(udplatency_vars.UDPLATENCYPERIOD,
+												TIMER_PERIODIC,TIME_MS,
+												udplatency_timer);
 }
 
 void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -144,6 +176,160 @@ void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 void udplatency_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
+}
+
+void trigger_receive(OpenQueueEntry_t* msg){
+
+	//TODO
+	uint16_t receivedRate;
+	uint16_t numberOfPackets;
+	uint8_t  securityFlag;
+	uint16_t timeToWaitReceived;
+
+	if(idmanager_getIsDAGroot()){
+		udplatency_vars.triggerReceived = TRUE;
+	}
+
+	//if I have received the desync message previously, simply discard it.
+	if (udplatency_vars.triggerReceived == TRUE){
+		//free the RAM
+		openqueue_freePacketBuffer(msg);
+
+		return;
+	} else {
+		udplatency_vars.triggerReceived = TRUE;
+	}
+
+    openserial_printError(COMPONENT_UDPLATENCY,ERR_INVALIDSERIALFRAME,
+                  (errorparameter_t)0,
+                  (errorparameter_t)500);
+
+    //toss the protocol header
+	packetfunctions_tossHeader(msg,1);
+
+	//retrieve values
+	//get the rate
+	receivedRate = msg->payload[0] + 256 * msg->payload[1];
+	packetfunctions_tossHeader(msg,2);
+
+	//get the number of packets to generate
+	numberOfPackets = msg->payload[0] + 256 * msg->payload[1];
+	packetfunctions_tossHeader(msg,2);
+
+	//get the security flag
+	securityFlag = msg->payload[0];
+	packetfunctions_tossHeader(msg,1);
+
+	//get the time to wait
+	timeToWaitReceived = msg->payload[0] + 256 * msg->payload[1];
+	packetfunctions_tossHeader(msg,2);
+
+	//free up the RAM
+	openqueue_freePacketBuffer(msg);
+
+	//save variables
+	udplatency_vars.UDPLATENCYPERIOD    = receivedRate;
+	udplatency_vars.NUMPKTTEST          = numberOfPackets;
+	udplatency_vars.udplatency_security = securityFlag;
+	udplatency_vars.timeToWaitReceived  = timeToWaitReceived;
+
+	//schedule the timer for the start of the UDPLatency task
+	udplatency_vars.globaltimerId = opentimers_start(timeToWaitReceived,
+													 TIMER_ONESHOT,TIME_MS,
+													 udplatency_pushTimer);
+
+	//forward the packet
+//	udplatency_vars.timerTriggerForward = opentimers_start(50,
+//			 	 	 	 	 	 	 	 	 	 	 	TIMER_ONESHOT,TIME_MS,
+//														udplatency_forwardTimer);
+//	return;
+}
+
+
+uint16_t udplatency_getSeqNum(void){
+	uint16_t value;
+	value = udplatency_vars.seqNum_global;
+	udplatency_vars.seqNum_global++;
+	return value;
+}
+
+uint8_t udplatency_getTimerId(void){
+	return udplatency_vars.timerId;
+}
+
+void udplatency_setSecurity(bool value){
+	udplatency_vars.udplatency_security = value;
+}
+
+bool udplatency_getSecurity(void){
+	return udplatency_vars.udplatency_security;
+}
+
+void udplatency_setPeriod(uint16_t value){
+	udplatency_vars.UDPLATENCYPERIOD = value;
+}
+
+/*
+ * Forward the trigger message down in the tree
+ */
+void trigger_forward(void){
+
+	OpenQueueEntry_t* pkt;
+
+    //generate a broadcast MAC message with received parameters
+    pkt = openqueue_getFreePacketBuffer(COMPONENT_OPENBRIDGE);
+    if (pkt==NULL) {
+//	  openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
+//						   (errorparameter_t)0,
+//						   (errorparameter_t)2);
+	  return;
+    }
+
+    openserial_printError(COMPONENT_UDPLATENCY,ERR_INVALIDSERIALFRAME,
+                  (errorparameter_t)0,
+                  (errorparameter_t)501);
+
+   //admin
+   pkt->creator  = COMPONENT_SIXTOP;
+   pkt->owner    = COMPONENT_UDPLATENCY;
+
+   // some l2 information about this packet
+   pkt->l2_frameType                     = IEEE154_TYPE_DATA;
+   pkt->l2_nextORpreviousHop.type        = ADDR_16B;
+   pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+   pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+   pkt->isBroadcastIE                    = TRUE;
+   //   pkt->FIFO_sn 						 = 0; //maximum priority
+
+   //payload
+   //amount of time we have to wait for the start of sending packets
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+   pkt->payload[0] = (uint8_t) udplatency_vars.timeToWaitReceived;
+   pkt->payload[1] = (uint8_t) (udplatency_vars.timeToWaitReceived >> 8);
+
+   //security flag
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+   pkt->payload[0] = udplatency_vars.udplatency_security; //list-termination
+
+   //number of packets
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+   pkt->payload[0] = (uint8_t) udplatency_vars.NUMPKTTEST;
+   pkt->payload[1] = (uint8_t) (udplatency_vars.NUMPKTTEST >> 8);
+
+   //rate
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+   pkt->payload[0] = (uint8_t) udplatency_vars.UDPLATENCYPERIOD;
+   pkt->payload[1] = (uint8_t) (udplatency_vars.UDPLATENCYPERIOD >> 8);
+
+   //add id for the protocol
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+   pkt->payload[0] = 0xAB;
+
+   // put in queue for MAC to handle
+   sixtop_send(pkt);
+
+   return;
+
 }
 
 //=========================== private =========================================

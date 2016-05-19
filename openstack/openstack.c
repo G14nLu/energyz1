@@ -64,7 +64,7 @@ void openstack_init(void) {
    sixtop_init();
    neighbors_init();
    //START OF TELEMATICS CODE
-   security_init();
+   //security_init();
    //END OF TELEMATICS CODE
    //-- 03a-IPHC
    openbridge_init();

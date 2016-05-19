@@ -74,6 +74,12 @@ void      task_sixtopNotifReceive(void);
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);
 
+// send internal
+owerror_t     sixtop_send_internal(
+   OpenQueueEntry_t*    msg,
+   uint8_t              iePresent,
+   uint8_t              frameVersion
+);
 /**
 \}
 \}

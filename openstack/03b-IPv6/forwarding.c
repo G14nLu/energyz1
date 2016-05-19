@@ -12,6 +12,7 @@
 #include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
+#include "udplatency.h"
 
 //=========================== variables =======================================
 
@@ -227,6 +228,23 @@ void forwarding_receive(
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
+      //TODO
+      //identify udplatency packets
+//      uint8_t i;
+//      for (i=0;i < msg->length; i++){
+//    	  if (msg->payload[i] == 238 && msg->payload[i+1] == 73){
+//    		  openserial_printError(
+//    			 COMPONENT_FORWARDING,
+//    			 0xff,
+//    			 (errorparameter_t)i,
+//    			 (errorparameter_t)i+1);
+//    	  }
+//      }
+      if(msg->payload[0] == 238 && msg->payload[1] == 73){
+    	  msg->creator = COMPONENT_UDPLATENCY;
+    	  msg->FIFO_seqNum = udplatency_getSeqNum();
+      }
+
       if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header

@@ -522,12 +522,12 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          neighbors_vars.neighbors[i].parentPreference=0;
          
          // calculate link cost to this neighbor
-         if (neighbors_vars.neighbors[i].numTxACK==0) {
+         //if (neighbors_vars.neighbors[i].numTxACK==0) {
             rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
-         } else {
+         //} else {
             //6TiSCH minimal draft using OF0 for rank computation
-            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
-         }
+           // rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
+         //}
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&

@@ -75,7 +75,7 @@ typedef struct{//defines what kind of frame the key is intended
 	} m_keyUsageDescriptor;
 
 typedef struct{//Table which contains the device that are currently using this key
-	m_deviceDescriptor    DeviceDescriptorEntry[MAXNUMNEIGHBORS];
+	m_deviceDescriptor    DeviceDescriptorEntry[2];
 	} m_macDeviceTable;
 
 
@@ -87,7 +87,7 @@ typedef struct{//descriptor of the key
 	} m_keyDescriptor;
 
 typedef struct{
-	m_keyDescriptor   KeyDescriptorElement[MAXNUMKEYS];
+	m_keyDescriptor   KeyDescriptorElement[2];
 	} m_macKeyTable;
 
 typedef struct{
