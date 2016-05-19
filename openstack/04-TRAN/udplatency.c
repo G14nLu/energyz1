@@ -37,8 +37,8 @@ void udplatency_init(void) {
    udplatency_vars.udplatency_security 	= 0;
    udplatency_vars.triggerReceived 		= 0;
 
-   udplatency_vars.UDPLATENCYPERIOD = 4000;
-   udplatency_vars.NUMPKTTEST = 10;
+   udplatency_vars.UDPLATENCYPERIOD = 2000;
+   udplatency_vars.NUMPKTTEST = 300;
 
    udplatency_vars.timerId    = opentimers_start(udplatency_vars.UDPLATENCYPERIOD,
    												TIMER_PERIODIC,TIME_MS,
@@ -94,6 +94,7 @@ void udplatency_task() {
    pkt->payload[6]    = p->addr_64b[6];
    pkt->payload[7]    = p->addr_64b[7];
    
+
    neighbors_getPreferredParentEui64(&q);
    if (q.type==ADDR_64B) {
       packetfunctions_reserveHeaderSize(pkt,8);
